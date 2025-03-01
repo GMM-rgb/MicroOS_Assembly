@@ -194,6 +194,14 @@ microos/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/build
 .PHONY : microos/fast
 
+display_functions.o: display_functions.s.o
+.PHONY : display_functions.o
+
+# target to build an object file
+display_functions.s.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/display_functions.s.o
+.PHONY : display_functions.s.o
+
 microos.o: microos.c.o
 .PHONY : microos.o
 
@@ -233,6 +241,7 @@ help:
 	@echo "... package_source"
 	@echo "... rebuild_cache"
 	@echo "... microos"
+	@echo "... display_functions.o"
 	@echo "... microos.o"
 	@echo "... microos.i"
 	@echo "... microos.s"

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(MicroOS C ASM)
 
+# Set assembly language to use
+enable_language(ASM)
+
 # Detect OS and architecture
 if(WIN32)
     set(SDL2_DIR "${CMAKE_SOURCE_DIR}/external/SDL2" CACHE PATH "SDL2 directory")
@@ -13,12 +16,20 @@ elseif(UNIX)
     set(SDL2_TTF_DIR "/usr" CACHE PATH "SDL2_ttf directory")
 endif()
 
-# Find required packages
+# Set SDL2 paths for Mac ARM64 (update these paths)
+set(SDL2_INCLUDE_DIR "/opt/homebrew/include")
+set(SDL2_LIB_DIR "/opt/homebrew/lib")
+
+# Remove the old include_directories commands and replace with these:
+include_directories(${SDL2_INCLUDE_DIR})
+include_directories("${SDL2_INCLUDE_DIR}/SDL2")
+include_directories("/opt/homebrew/include")  # Add this line
+
+# Find required packages (update these paths)
+set(SDL2_DIR "/opt/homebrew/lib/cmake/SDL2")
+set(SDL2_TTF_DIR "/opt/homebrew/lib/cmake/SDL2_ttf")
 find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
-
-# Include directories
-include_directories(/opt/homebrew/include/SDL2)
 
 # Source files
 set(SOURCES
@@ -34,28 +45,40 @@ endif()
 # Add the appropriate display implementation
 if(USE_ASM)
     # Use assembly implementation
-    if(WIN32)
-        set(ASM_SOURCES display_functions_win.asm)
+    if(APPLE)
+        enable_language(ASM)
+        set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -arch arm64")
+        set(ASM_SOURCES display_functions.s)
+        list(APPEND SOURCES ${ASM_SOURCES})
     else()
-        set(ASM_SOURCES display_functions.asm)
+        if(WIN32)
+            set(ASM_SOURCES display_functions_win.asm)
+        else()
+            set(ASM_SOURCES display_functions.asm)
+        endif()
+
+        # Explicitly compile the ASM file with nasm
+        add_custom_command(
+            OUTPUT ${CMAKE_BINARY_DIR}/display_functions.asm.o
+            COMMAND nasm -f macho64 -o ${CMAKE_BINARY_DIR}/display_functions.asm.o ${CMAKE_SOURCE_DIR}/display_functions.asm
+            DEPENDS ${CMAKE_SOURCE_DIR}/display_functions.asm
+            COMMENT "Compiling display_functions.asm with NASM for macOS"
+        )
+
+        # Add the generated object file to the sources list
+        list(APPEND SOURCES ${CMAKE_BINARY_DIR}/display_functions.asm.o)
     endif()
-
-    # Explicitly compile the ASM file with nasm
-    add_custom_command(
-        OUTPUT ${CMAKE_BINARY_DIR}/display_functions.asm.o
-        COMMAND nasm -f macho64 -o ${CMAKE_BINARY_DIR}/display_functions.asm.o ${CMAKE_SOURCE_DIR}/display_functions.asm
-        DEPENDS ${CMAKE_SOURCE_DIR}/display_functions.asm
-        COMMENT "Compiling display_functions.asm with NASM for macOS"
-    )
-
-    # Add the generated object file to the sources list
-    list(APPEND SOURCES ${CMAKE_BINARY_DIR}/display_functions.asm.o)
 else()
     list(APPEND SOURCES display_functions.c)
 endif()
 
 # Create executable
 add_executable(microos ${SOURCES})
+
+# Set assembly file properties
+set_source_files_properties(display_functions.asm PROPERTIES
+    COMPILE_FLAGS "-arch arm64"
+)
 
 # Disable PIE linking to avoid relocation issues in the assembly object
 if(APPLE)
@@ -72,6 +95,12 @@ if(APPLE)
 else()
     target_link_libraries(microos ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES})
 endif()
+
+# Link SDL2 libraries
+target_link_libraries(microos
+    "${SDL2_LIB_DIR}/libSDL2-2.0.0.dylib"
+    "${SDL2_LIB_DIR}/libSDL2_ttf-2.0.0.dylib"
+)
 
 # Installation
 install(TARGETS microos DESTINATION bin)

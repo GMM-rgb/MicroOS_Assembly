@@ -1,67 +1,58 @@
-; display_functions.asm - x86-64 implementation
-; Compile with NASM for x86-64 systems
+; display_functions.asm - ARM64 implementation
+; Compile with NASM for ARM64 systems
 
-section .data
-    tick dq 0               ; Define tick as a 64-bit integer (quadword) initialized to 0
+.global _initialize_display_memory
+.global _update_display
+.global _tick
 
-section .text
-    global initialize_display_memory
-    global update_display
+.data
+_tick: .quad 0                  // 64-bit counter
 
-initialize_display_memory:
-    push rbp
-    mov rbp, rsp
-    push rbx
-    xor rbx, rbx
+.text
+_initialize_display_memory:     // void initialize_display_memory(unsigned char *display_memory)
+    stp     x29, x30, [sp, #-16]!  // Save frame pointer and link register
+    mov     x29, sp
+    mov     x1, #0              // Initialize counter
 
-.init_loop:
-    mov byte [rdi + rbx], 0
-    inc rbx
-    cmp rbx, 64
-    jl .init_loop
+1:  strb    w1, [x0, x1]       // Store byte value at display_memory[i]
+    add     x1, x1, #1         // Increment counter
+    cmp     x1, #64            // Compare with array size
+    b.lt    1b                 // Loop if less than 64
 
-    pop rbx
-    pop rbp
+    ldp     x29, x30, [sp], #16    // Restore frame pointer and link register
     ret
 
-update_display:
-    push rbp
-    mov rbp, rsp
-    push rbx
+_update_display:               // void update_display(unsigned char *display_memory)
+    stp     x29, x30, [sp, #-16]!
+    mov     x29, sp
+    
+    adrp    x2, _tick@PAGE     // Load address of tick
+    add     x2, x2, _tick@PAGEOFF
+    ldr     x3, [x2]          // Load tick value
+    add     x3, x3, #1        // Increment tick
+    str     x3, [x2]          // Store new tick value
 
-    ; Load and increment tick using RIP-relative addressing
-    lea rbx, [rel tick]
-    mov rax, [rbx]
-    inc rax
-    mov [rbx], rax
+    mov     x1, #0            // Initialize counter
 
-    xor rbx, rbx
+1:  ldrb    w2, [x0, x1]     // Load current byte
+    add     w2, w2, #1       // Increment value
+    strb    w2, [x0, x1]     // Store updated byte
 
-.update_loop:
-    mov al, [rdi + rbx]
-    inc al
-    mov [rdi + rbx], al
+    add     x4, x1, x3       // i + tick
+    mov     x5, #5
+    udiv    x6, x4, x5       // (i + tick) / 5
+    msub    x6, x6, x5, x4   // Calculate remainder
 
-    mov rax, rbx
-    add rax, [rbx]          ; Use 64-bit addressing for tick
-    xor rdx, rdx
-    mov rcx, 5
-    div rcx
+    cbz     x6, 2f           // If remainder is 0, apply variation
+    b       3f               // Skip variation
 
-    cmp rdx, 0
-    jne .skip_variation
+2:  ldrb    w2, [x0, x1]     // Load current byte again
+    add     w2, w2, #10      // Add variation
+    strb    w2, [x0, x1]     // Store varied byte
 
-    mov al, [rdi + rbx]
-    add al, 10
-    mov [rdi + rbx], al
+3:  add     x1, x1, #1       // Increment counter
+    cmp     x1, #64          // Compare with array size
+    b.lt    1b              // Loop if less than 64
 
-.skip_variation:
-    inc rbx
-    cmp rbx, 64
-    jl .update_loop
-
-    pop rbx
-    pop rbp
+    ldp     x29, x30, [sp], #16
     ret
-
-; section .note.GNU-stack noalloc noexec nowrite progbits

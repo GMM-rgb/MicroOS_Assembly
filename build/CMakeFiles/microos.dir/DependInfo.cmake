@@ -4,6 +4,18 @@ set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
 
 # The set of languages for which implicit dependencies are needed:
 set(CMAKE_DEPENDS_LANGUAGES
+  "ASM"
+  )
+# The set of files for implicit dependencies of each language:
+set(CMAKE_DEPENDS_CHECK_ASM
+  "/Users/maximus.farvour/Documents/MicroOS_Assembly/display_functions.s" "/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles/microos.dir/display_functions.s.o"
+  )
+set(CMAKE_ASM_COMPILER_ID "AppleClang")
+
+# The include file search paths:
+set(CMAKE_ASM_TARGET_INCLUDE_PATH
+  "/opt/homebrew/include"
+  "/opt/homebrew/include/SDL2"
   )
 
 # The set of dependency files which are needed:

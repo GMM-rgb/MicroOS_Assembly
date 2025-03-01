@@ -69,17 +69,13 @@ include CMakeFiles/microos.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/microos.dir/flags.make
 
-display_functions.asm.o: /Users/maximus.farvour/Documents/MicroOS_Assembly/display_functions.asm
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Compiling display_functions.asm with NASM for macOS"
-	nasm -f macho64 -o /Users/maximus.farvour/Documents/MicroOS_Assembly/build/display_functions.asm.o /Users/maximus.farvour/Documents/MicroOS_Assembly/display_functions.asm
-
 CMakeFiles/microos.dir/codegen:
 .PHONY : CMakeFiles/microos.dir/codegen
 
 CMakeFiles/microos.dir/microos.c.o: CMakeFiles/microos.dir/flags.make
 CMakeFiles/microos.dir/microos.c.o: /Users/maximus.farvour/Documents/MicroOS_Assembly/microos.c
 CMakeFiles/microos.dir/microos.c.o: CMakeFiles/microos.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/microos.dir/microos.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/microos.dir/microos.c.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/microos.dir/microos.c.o -MF CMakeFiles/microos.dir/microos.c.o.d -o CMakeFiles/microos.dir/microos.c.o -c /Users/maximus.farvour/Documents/MicroOS_Assembly/microos.c
 
 CMakeFiles/microos.dir/microos.c.i: cmake_force
@@ -90,19 +86,34 @@ CMakeFiles/microos.dir/microos.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/microos.dir/microos.c.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/maximus.farvour/Documents/MicroOS_Assembly/microos.c -o CMakeFiles/microos.dir/microos.c.s
 
+CMakeFiles/microos.dir/display_functions.s.o: CMakeFiles/microos.dir/flags.make
+CMakeFiles/microos.dir/display_functions.s.o: /Users/maximus.farvour/Documents/MicroOS_Assembly/display_functions.s
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building ASM object CMakeFiles/microos.dir/display_functions.s.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/microos.dir/display_functions.s.o -c /Users/maximus.farvour/Documents/MicroOS_Assembly/display_functions.s
+
+CMakeFiles/microos.dir/display_functions.s.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing ASM source to CMakeFiles/microos.dir/display_functions.s.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -E /Users/maximus.farvour/Documents/MicroOS_Assembly/display_functions.s > CMakeFiles/microos.dir/display_functions.s.i
+
+CMakeFiles/microos.dir/display_functions.s.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling ASM source to assembly CMakeFiles/microos.dir/display_functions.s.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -S /Users/maximus.farvour/Documents/MicroOS_Assembly/display_functions.s -o CMakeFiles/microos.dir/display_functions.s.s
+
 # Object files for target microos
 microos_OBJECTS = \
-"CMakeFiles/microos.dir/microos.c.o"
+"CMakeFiles/microos.dir/microos.c.o" \
+"CMakeFiles/microos.dir/display_functions.s.o"
 
 # External object files for target microos
-microos_EXTERNAL_OBJECTS = \
-"/Users/maximus.farvour/Documents/MicroOS_Assembly/build/display_functions.asm.o"
+microos_EXTERNAL_OBJECTS =
 
 microos: CMakeFiles/microos.dir/microos.c.o
-microos: display_functions.asm.o
+microos: CMakeFiles/microos.dir/display_functions.s.o
 microos: CMakeFiles/microos.dir/build.make
 microos: /opt/homebrew/lib/libSDL2.dylib
 microos: /opt/homebrew/Cellar/sdl2_ttf/2.24.0/lib/libSDL2_ttf.dylib
+microos: /opt/homebrew/lib/libSDL2-2.0.0.dylib
+microos: /opt/homebrew/lib/libSDL2_ttf-2.0.0.dylib
 microos: CMakeFiles/microos.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable microos"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/microos.dir/link.txt --verbose=$(VERBOSE)
@@ -115,7 +126,7 @@ CMakeFiles/microos.dir/clean:
 	$(CMAKE_COMMAND) -P CMakeFiles/microos.dir/cmake_clean.cmake
 .PHONY : CMakeFiles/microos.dir/clean
 
-CMakeFiles/microos.dir/depend: display_functions.asm.o
+CMakeFiles/microos.dir/depend:
 	cd /Users/maximus.farvour/Documents/MicroOS_Assembly/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/maximus.farvour/Documents/MicroOS_Assembly /Users/maximus.farvour/Documents/MicroOS_Assembly /Users/maximus.farvour/Documents/MicroOS_Assembly/build /Users/maximus.farvour/Documents/MicroOS_Assembly/build /Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles/microos.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/microos.dir/depend
 

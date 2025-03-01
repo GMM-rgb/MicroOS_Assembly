@@ -276,8 +276,8 @@ MicroOS_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 MicroOS_SOURCE_DIR:STATIC=/Users/maximus.farvour/Documents/MicroOS_Assembly
 
-//The directory containing a CMake configuration file for SDL2.
-SDL2_DIR:PATH=/opt/homebrew/lib/cmake/SDL2
+//SDL2 directory
+SDL2_DIR:PATH=/opt/homebrew/Cellar/sdl2/2.32.0/include/SDL2
 
 //Path to a library.
 SDL2_LIB:FILEPATH=/opt/homebrew/lib/libSDL2.dylib

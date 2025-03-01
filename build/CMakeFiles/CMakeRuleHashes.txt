@@ -1,2 +1,0 @@
-# Hashes of file build rules.
-0879454bd35ce520b5b4bfeb01c7166b display_functions.asm.o
