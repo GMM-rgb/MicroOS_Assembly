@@ -63,6 +63,27 @@ MenuItemAnimation menu_items[MENU_ITEM_COUNT] = {0};
 char currentSettingsPage[16] = "";
 bool showSettingsSidebar = false;
 
+// Add new global variable for settings UI state
+SettingsUIState settings_ui_state = {0};
+
+// Function to calculate the total height of the settings content
+int calculate_settings_content_height(void) {
+    int height = 60;  // Initial offset
+    height += 45;  // Display section header height
+    if (settings_ui_state.display_section_expanded) {
+        height += 205;  // Display section content height
+    }
+    height += 45;  // Sound section header height
+    if (settings_ui_state.sound_section_expanded) {
+        height += 205;  // Sound section content height
+    }
+    height += 45;  // Network section header height
+    if (settings_ui_state.network_section_expanded) {
+        height += 205;  // Network section content height
+    }
+    return height;
+}
+
 void init_menu_animations() {
     for (int i = 0; i < MENU_ITEM_COUNT; i++) {
         menu_items[i].x = -100;  // Start offscreen
@@ -682,6 +703,96 @@ void draw_settings_page(SDL_Renderer* renderer, TTF_Font* font, SDL_Rect content
     }
 }
 
+void reset_temporary_data(Application* apps) {
+    // Reset terminal
+    if (apps[0].terminal) {
+        terminal_reset(apps[0].terminal);
+    }
+    
+    // Reset document editor
+    if (apps[2].editor) {
+        editor_reset(apps[2].editor);
+    }
+    
+    // Reset settings UI state
+    settings_ui_state = (SettingsUIState){0};
+    showSettingsSidebar = false;
+}
+
+void draw_settings_section(SDL_Renderer* renderer, TTF_Font* font, SDL_Rect* rect, 
+                         const char* title, bool expanded, SDL_Color* color) {
+    // Draw section background
+    SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, color->a);
+    SDL_RenderFillRect(renderer, rect);
+
+    // Draw title
+    SDL_Color text_color = {255, 255, 255, 255};
+    SDL_Surface* surface = TTF_RenderText_Solid(font, title, text_color);
+    if (surface) {
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_Rect text_rect = {
+            rect->x + 10,
+            rect->y + (rect->h - surface->h) / 2,
+            surface->w,
+            surface->h
+        };
+        SDL_RenderCopy(renderer, texture, NULL, &text_rect);
+        SDL_DestroyTexture(texture);
+        SDL_FreeSurface(surface);
+    }
+
+    // Draw expand/collapse arrow
+    int arrow_size = 10;
+    SDL_Point arrow[3];
+    if (expanded) {
+        // Down arrow
+        arrow[0] = (SDL_Point){rect->x + rect->w - 20, rect->y + rect->h/2 - arrow_size/2};
+        arrow[1] = (SDL_Point){rect->x + rect->w - 20 + arrow_size, rect->y + rect->h/2 - arrow_size/2};
+        arrow[2] = (SDL_Point){rect->x + rect->w - 20 + arrow_size/2, rect->y + rect->h/2 + arrow_size/2};
+    } else {
+        // Right arrow
+        arrow[0] = (SDL_Point){rect->x + rect->w - 20, rect->y + rect->h/2 - arrow_size/2};
+        arrow[1] = (SDL_Point){rect->x + rect->w - 20 + arrow_size, rect->y + rect->h/2};
+        arrow[2] = (SDL_Point){rect->x + rect->w - 20, rect->y + rect->h/2 + arrow_size/2};
+    }
+    SDL_RenderDrawLines(renderer, arrow, 3);
+}
+
+// Update the settings app drawing function:
+void draw_settings_app(SDL_Renderer* renderer, TTF_Font* font, Application* app) {
+    SDL_Rect content = {0, 25, 320, 295};
+    int y_offset = 60 - settings_ui_state.scroll_position;
+    
+    // Display section
+    SDL_Rect display_section = {35, y_offset, 250, 40};
+    draw_settings_section(renderer, font, &display_section, "Display", 
+                         settings_ui_state.display_section_expanded, 
+                         &(SDL_Color){100, 100, 200, 255});
+
+    y_offset += 45;  // Base spacing between sections
+
+    // If display section is expanded, draw its content
+    if (settings_ui_state.display_section_expanded) {
+        SDL_Rect settings_content = {35, y_offset, 250, 200};  // Adjust height as needed
+        draw_settings_page(renderer, font, settings_content, app, "Display");
+        y_offset += 205;  // Adjust based on content height
+    }
+
+    // Sound section
+    SDL_Rect sound_section = {35, y_offset, 250, 40};
+    draw_settings_section(renderer, font, &sound_section, "Sound",
+                         settings_ui_state.sound_section_expanded,
+                         &(SDL_Color){100, 200, 100, 255});
+    
+    y_offset += 45;
+
+    // Network section
+    SDL_Rect network_section = {35, y_offset, 250, 40};
+    draw_settings_section(renderer, font, &network_section, "Network",
+                         settings_ui_state.network_section_expanded,
+                         &(SDL_Color){200, 100, 100, 255});
+}
+
 int main(int argc, char *argv[])
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -884,6 +995,7 @@ int main(int argc, char *argv[])
                                 else if (i == 3)
                                 {
                                     // Shutdown
+                                    reset_temporary_data(apps);
                                     currentState = OS_STATE_BOOT;
                                     bootProgress = 0;
                                 }
@@ -978,6 +1090,32 @@ int main(int argc, char *argv[])
                 int w, h;
                 SDL_GetWindowSize(window, &w, &h);
                 SDL_RenderSetLogicalSize(renderer, w, h);
+            }
+            // In the main event loop, update the settings click handling:
+            if (currentState == OS_STATE_APP2 && e.type == SDL_MOUSEBUTTONDOWN) {
+                int x = e.button.x;
+                int y = e.button.y;
+                int real_y = y + settings_ui_state.scroll_position;
+                
+                // Check display section header
+                SDL_Rect display_section = {35, 60, 250, 40};
+                if (x >= display_section.x && x <= display_section.x + display_section.w &&
+                    real_y >= display_section.y && real_y <= display_section.y + display_section.h) {
+                    settings_ui_state.display_section_expanded = !settings_ui_state.display_section_expanded;
+                }
+                
+                // Similar checks for sound and network sections...
+            } else if (currentState == OS_STATE_APP2 && e.type == SDL_MOUSEWHEEL) {
+                settings_ui_state.scroll_position -= e.wheel.y * 20;  // Adjust scroll speed
+                if (settings_ui_state.scroll_position < 0) {
+                    settings_ui_state.scroll_position = 0;
+                }
+                
+                // Calculate max scroll based on content height
+                int max_scroll = calculate_settings_content_height() - 295;  // 295 is visible area height
+                if (settings_ui_state.scroll_position > max_scroll) {
+                    settings_ui_state.scroll_position = max_scroll;
+                }
             }
         }
 

@@ -39,4 +39,7 @@ void terminal_handle_mouse(Terminal* term, SDL_MouseWheelEvent* event);
 void terminal_open_file_view(Terminal* term, const char* path);
 void terminal_open_file_edit(Terminal* term, const char* path);
 
+// Add new function declaration
+void terminal_reset(Terminal* term);
+
 #endif // MICROOS_TERMINAL_H

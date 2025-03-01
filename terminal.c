@@ -334,3 +334,16 @@ void terminal_open_file_edit(Terminal* term, const char* path) {
         editor_destroy(editor);
     }
 }
+
+void terminal_reset(Terminal* term) {
+    // Clear all lines except the first two (welcome messages)
+    for (int i = 2; i < term->line_count; i++) {
+        free(term->lines[i]);
+    }
+    term->line_count = 2;
+    term->cursor_position = 0;
+    term->scroll_position = 0;
+    term->current_command[0] = '\0';
+    term->history_count = 0;
+    term->history_position = -1;
+}

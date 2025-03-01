@@ -45,6 +45,30 @@ void editor_destroy(TextEditor* editor) {
     free(editor);
 }
 
+void editor_reset(TextEditor* editor) {
+    editor->is_open = false;
+    if (editor->file_path) {
+        free(editor->file_path);
+        editor->file_path = NULL;
+    }
+    
+    // Clear all lines
+    for (int i = 0; i < editor->line_count; i++) {
+        free(editor->lines[i].text);
+    }
+    
+    // Reset to initial state
+    editor->line_count = 1;
+    editor->lines[0].text = strdup("");
+    editor->lines[0].length = 0;
+    editor->cursor_line = 0;
+    editor->cursor_col = 0;
+    editor->scroll_x = 0;
+    editor->scroll_y = 0;
+    editor->selection_start_line = -1;
+    editor->has_changes = false;
+}
+
 static void editor_save_undo_state(TextEditor* editor) {
     // Save current state to undo buffer
     char* state = malloc(MAX_LINE_LENGTH * editor->line_count);

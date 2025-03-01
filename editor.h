@@ -65,5 +65,6 @@ void editor_copy(TextEditor* editor);
 void editor_paste(TextEditor* editor);
 void editor_undo(TextEditor* editor);
 void editor_redo(TextEditor* editor);
+void editor_reset(TextEditor* editor);
 
 #endif // MICROOS_EDITOR_H
