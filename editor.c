@@ -294,6 +294,24 @@ bool editor_save(TextEditor* editor, FileSystem* fs) {
     return result;
 }
 
+bool editor_load(TextEditor* editor, FileSystem* fs, const char* path) {
+    char* content = fs_read_file(fs, path);
+    if (!content) return false;
+
+    editor->file_path = strdup(path);
+    editor->line_count = 0;
+
+    char* line = strtok(content, "\n");
+    while (line && editor->line_count < MAX_DOCUMENT_LINES) {
+        editor->lines[editor->line_count].text = strdup(line);
+        editor->lines[editor->line_count].length = strlen(line);
+        editor->line_count++;
+        line = strtok(NULL, "\n");
+    }
+
+    return true;
+}
+
 void editor_insert_text(TextEditor* editor, const char* text) {
     if (!editor->is_open) return;
 

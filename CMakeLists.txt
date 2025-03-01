@@ -35,10 +35,10 @@ find_package(SDL2_ttf REQUIRED)
 set(SOURCES
     microos.c
     filesystem.c
-    terminal.c  # Ensure this line is present
-    fileui.c       # Add FileUI implementation
-    editor.c       # Add TextEditor implementation
-    settings.c         # <-- Added to compile settings functions
+    terminal.c
+    fileui.c
+    editor.c
+    settings.c
     ${ASM_SOURCES}
 )
 

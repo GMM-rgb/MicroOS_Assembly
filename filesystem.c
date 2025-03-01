@@ -92,6 +92,7 @@ FileNode* fs_create_file(FileSystem* fs, const char* path, bool is_directory) {
     // Add to parent
     if (current->child_count < MAX_CHILDREN) {
         current->children[current->child_count++] = new_node;
+        current->size += fs_get_size(new_node);  // Update parent directory size
     }
     
     // Cleanup

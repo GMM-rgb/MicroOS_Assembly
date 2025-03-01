@@ -1,4 +1,5 @@
 #include "terminal.h"
+#include "editor.h"  // Include the editor header file
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -90,6 +91,20 @@ void terminal_execute_command(Terminal* term) {
         terminal_add_line(term, "  dir           - List files and directories in current directory");
         terminal_add_line(term, "  nedir <dir>   - Create a new directory");
         terminal_add_line(term, "  reboot        - Reboots / Restarts the system");
+    } else if (strcmp(command, "view") == 0) {
+        char* file = strtok(NULL, " ");
+        if (file) {
+            terminal_open_file_view(term, file);
+        } else {
+            terminal_add_line(term, "Error: No file specified.");
+        }
+    } else if (strcmp(command, "edit") == 0) {
+        char* file = strtok(NULL, " ");
+        if (file) {
+            terminal_open_file_edit(term, file);
+        } else {
+            terminal_add_line(term, "Error: No file specified.");
+        }
     } else if (strcmp(command, "ls") == 0 || strcmp(command, "dir") == 0) {
         FileNode** files;
         int count;
@@ -101,6 +116,18 @@ void terminal_execute_command(Terminal* term) {
                     fs_format_size(files[i]->size),
                     fs_format_time(files[i]->modified));
             terminal_add_line(term, info);
+            if (files[i]->is_directory) {
+                FileNode** sub_files;
+                int sub_count;
+                fs_list_directory(term->fs, files[i]->name, &sub_files, &sub_count);
+                for (int j = 0; j < sub_count; j++) {
+                    snprintf(info, sizeof(info), "  %s  %s  %s", 
+                            sub_files[j]->name,
+                            fs_format_size(sub_files[j]->size),
+                            fs_format_time(sub_files[j]->modified));
+                    terminal_add_line(term, info);
+                }
+            }
         }
     } else if (strcmp(command, "cd") == 0) {
         char* dir = strtok(NULL, " ");
@@ -278,5 +305,32 @@ void terminal_handle_mouse(Terminal* term, SDL_MouseWheelEvent* event) {
         if (term->scroll_position < max_scroll) {
             term->scroll_position++;
         }
+    }
+}
+
+void terminal_open_file_view(Terminal* term, const char* path) {
+    char* content = fs_read_file(term->fs, path);
+    if (content) {
+        terminal_add_line(term, "Viewing file:");
+        char* line = strtok(content, "\n");
+        while (line) {
+            terminal_add_line(term, line);
+            line = strtok(NULL, "\n");
+        }
+    } else {
+        terminal_add_line(term, "Error: File not found or cannot be read.");
+    }
+}
+
+void terminal_open_file_edit(Terminal* term, const char* path) {
+    TextEditor* editor = editor_create();
+    if (editor_load(editor, term->fs, path)) {
+        editor->is_open = true;
+        // Assuming SDL_Renderer* renderer and TTF_Font* font are available
+        // You need to pass these parameters to this function or make them accessible
+        // editor_render(editor, renderer, font);
+    } else {
+        terminal_add_line(term, "Error: File not found or cannot be read.");
+        editor_destroy(editor);
     }
 }

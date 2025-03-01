@@ -35,4 +35,8 @@ void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL
 // Add new function declaration
 void terminal_handle_mouse(Terminal* term, SDL_MouseWheelEvent* event);
 
+// Add new function declarations for opening files in view and edit modes
+void terminal_open_file_view(Terminal* term, const char* path);
+void terminal_open_file_edit(Terminal* term, const char* path);
+
 #endif // MICROOS_TERMINAL_H

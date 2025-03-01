@@ -218,4 +218,5 @@ CMakeFiles/microos.dir/terminal.c.o: \
   /opt/homebrew/include/SDL2/SDL_version.h \
   /opt/homebrew/include/SDL2/SDL_locale.h \
   /opt/homebrew/include/SDL2/SDL_misc.h \
-  /opt/homebrew/include/SDL2/SDL_ttf.h
+  /opt/homebrew/include/SDL2/SDL_ttf.h \
+  /Users/maximus.farvour/Documents/MicroOS_Assembly/editor.h
