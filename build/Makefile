@@ -202,6 +202,30 @@ display_functions.s.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/display_functions.s.o
 .PHONY : display_functions.s.o
 
+editor.o: editor.c.o
+.PHONY : editor.o
+
+# target to build an object file
+editor.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/editor.c.o
+.PHONY : editor.c.o
+
+editor.i: editor.c.i
+.PHONY : editor.i
+
+# target to preprocess a source file
+editor.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/editor.c.i
+.PHONY : editor.c.i
+
+editor.s: editor.c.s
+.PHONY : editor.s
+
+# target to generate assembly for a file
+editor.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/editor.c.s
+.PHONY : editor.c.s
+
 filesystem.o: filesystem.c.o
 .PHONY : filesystem.o
 
@@ -225,6 +249,30 @@ filesystem.s: filesystem.c.s
 filesystem.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/filesystem.c.s
 .PHONY : filesystem.c.s
+
+fileui.o: fileui.c.o
+.PHONY : fileui.o
+
+# target to build an object file
+fileui.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/fileui.c.o
+.PHONY : fileui.c.o
+
+fileui.i: fileui.c.i
+.PHONY : fileui.i
+
+# target to preprocess a source file
+fileui.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/fileui.c.i
+.PHONY : fileui.c.i
+
+fileui.s: fileui.c.s
+.PHONY : fileui.s
+
+# target to generate assembly for a file
+fileui.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/fileui.c.s
+.PHONY : fileui.c.s
 
 microos.o: microos.c.o
 .PHONY : microos.o
@@ -290,9 +338,15 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... microos"
 	@echo "... display_functions.o"
+	@echo "... editor.o"
+	@echo "... editor.i"
+	@echo "... editor.s"
 	@echo "... filesystem.o"
 	@echo "... filesystem.i"
 	@echo "... filesystem.s"
+	@echo "... fileui.o"
+	@echo "... fileui.i"
+	@echo "... fileui.s"
 	@echo "... microos.o"
 	@echo "... microos.i"
 	@echo "... microos.s"

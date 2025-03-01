@@ -6,6 +6,8 @@
 #include <string.h>
 #include "filesystem.h"
 #include "terminal.h"
+#include "fileui.h"
+#include "editor.h"  // Ensure this include is present
 
 // Function declarations for assembly routines
 extern void initialize_display_memory(unsigned char *display_memory);
@@ -29,6 +31,8 @@ typedef struct
     SDL_Color color;
     FileSystem* fs;  // Add this field
     Terminal* terminal;
+    FileUI* fileui;
+    TextEditor* editor;
 } Application;
 
 // Add a function to visualize the display memory pattern
@@ -358,40 +362,10 @@ void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_C
         }
     }
     else if (strcmp(appName, "Files") == 0) {
-        // File list area
-        SDL_Rect listRect = {35, 60, 250, 185};
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        SDL_RenderFillRect(renderer, &listRect);
-        
-        // Get current directory contents
-        FileNode** files;
-        int file_count;
-        fs_list_directory(fs, fs_get_current_path(fs), &files, &file_count);
-        
-        // Draw files and directories
-        for (int i = 0; i < file_count; i++) {
-            SDL_Color itemColor = files[i]->is_directory ? 
-                (SDL_Color){70, 70, 200, 255} : (SDL_Color){0, 0, 0, 255};
-                
-            char info[256];
-            snprintf(info, sizeof(info), "%s  %s  %s", 
-                    files[i]->name,
-                    fs_format_size(files[i]->size),
-                    fs_format_time(files[i]->modified));
-                    
-            SDL_Surface* textSurface = TTF_RenderText_Solid(font, info, itemColor);
-            if (textSurface != NULL) {
-                SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-                if (textTexture != NULL) {
-                    SDL_Rect textRect = {40, 65 + i * 20, textSurface->w, textSurface->h};
-                    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
-                    SDL_DestroyTexture(textTexture);
-                }
-                SDL_FreeSurface(textSurface);
-            }
+        fileui_render(apps[2].fileui, renderer, font);
+        if (apps[2].editor->is_open) {
+            editor_render(apps[2].editor, renderer, font);
         }
-        
-        free(files);
     }
 }
 
@@ -527,6 +501,8 @@ int main(int argc, char *argv[])
 
     // After initializing apps array:
     apps[0].terminal = terminal_create(fs);
+    apps[2].fileui = fileui_create(fs);
+    apps[2].editor = editor_create();
 
     OSState currentState = OS_STATE_BOOT;
     int bootProgress = 0;
@@ -634,6 +610,16 @@ int main(int argc, char *argv[])
             else if (e.type == SDL_KEYDOWN && currentState == OS_STATE_APP1) {
                 terminal_handle_keypress(apps[0].terminal, &e.key);
             }
+            if (currentState == OS_STATE_APP2) {
+                if (fileui_handle_event(apps[2].fileui, &e, apps[2].editor)) {
+                    // Event was handled by file UI
+                    continue;
+                }
+                if (editor_handle_event(apps[2].editor, &e)) {
+                    // Event was handled by text editor
+                    continue;
+                }
+            }
         }
 
         // Update logic
@@ -735,6 +721,8 @@ int main(int argc, char *argv[])
     TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    fileui_destroy(apps[2].fileui);
+    editor_destroy(apps[2].editor);
     TTF_Quit();
     SDL_Quit();
 

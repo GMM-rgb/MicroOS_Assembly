@@ -114,9 +114,37 @@ CMakeFiles/microos.dir/terminal.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/microos.dir/terminal.c.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/maximus.farvour/Documents/MicroOS_Assembly/terminal.c -o CMakeFiles/microos.dir/terminal.c.s
 
+CMakeFiles/microos.dir/fileui.c.o: CMakeFiles/microos.dir/flags.make
+CMakeFiles/microos.dir/fileui.c.o: /Users/maximus.farvour/Documents/MicroOS_Assembly/fileui.c
+CMakeFiles/microos.dir/fileui.c.o: CMakeFiles/microos.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/microos.dir/fileui.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/microos.dir/fileui.c.o -MF CMakeFiles/microos.dir/fileui.c.o.d -o CMakeFiles/microos.dir/fileui.c.o -c /Users/maximus.farvour/Documents/MicroOS_Assembly/fileui.c
+
+CMakeFiles/microos.dir/fileui.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/microos.dir/fileui.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/maximus.farvour/Documents/MicroOS_Assembly/fileui.c > CMakeFiles/microos.dir/fileui.c.i
+
+CMakeFiles/microos.dir/fileui.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/microos.dir/fileui.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/maximus.farvour/Documents/MicroOS_Assembly/fileui.c -o CMakeFiles/microos.dir/fileui.c.s
+
+CMakeFiles/microos.dir/editor.c.o: CMakeFiles/microos.dir/flags.make
+CMakeFiles/microos.dir/editor.c.o: /Users/maximus.farvour/Documents/MicroOS_Assembly/editor.c
+CMakeFiles/microos.dir/editor.c.o: CMakeFiles/microos.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/microos.dir/editor.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/microos.dir/editor.c.o -MF CMakeFiles/microos.dir/editor.c.o.d -o CMakeFiles/microos.dir/editor.c.o -c /Users/maximus.farvour/Documents/MicroOS_Assembly/editor.c
+
+CMakeFiles/microos.dir/editor.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/microos.dir/editor.c.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/maximus.farvour/Documents/MicroOS_Assembly/editor.c > CMakeFiles/microos.dir/editor.c.i
+
+CMakeFiles/microos.dir/editor.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/microos.dir/editor.c.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/maximus.farvour/Documents/MicroOS_Assembly/editor.c -o CMakeFiles/microos.dir/editor.c.s
+
 CMakeFiles/microos.dir/display_functions.s.o: CMakeFiles/microos.dir/flags.make
 CMakeFiles/microos.dir/display_functions.s.o: /Users/maximus.farvour/Documents/MicroOS_Assembly/display_functions.s
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building ASM object CMakeFiles/microos.dir/display_functions.s.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building ASM object CMakeFiles/microos.dir/display_functions.s.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(ASM_DEFINES) $(ASM_INCLUDES) $(ASM_FLAGS) -o CMakeFiles/microos.dir/display_functions.s.o -c /Users/maximus.farvour/Documents/MicroOS_Assembly/display_functions.s
 
 CMakeFiles/microos.dir/display_functions.s.i: cmake_force
@@ -132,6 +160,8 @@ microos_OBJECTS = \
 "CMakeFiles/microos.dir/microos.c.o" \
 "CMakeFiles/microos.dir/filesystem.c.o" \
 "CMakeFiles/microos.dir/terminal.c.o" \
+"CMakeFiles/microos.dir/fileui.c.o" \
+"CMakeFiles/microos.dir/editor.c.o" \
 "CMakeFiles/microos.dir/display_functions.s.o"
 
 # External object files for target microos
@@ -140,6 +170,8 @@ microos_EXTERNAL_OBJECTS =
 microos: CMakeFiles/microos.dir/microos.c.o
 microos: CMakeFiles/microos.dir/filesystem.c.o
 microos: CMakeFiles/microos.dir/terminal.c.o
+microos: CMakeFiles/microos.dir/fileui.c.o
+microos: CMakeFiles/microos.dir/editor.c.o
 microos: CMakeFiles/microos.dir/display_functions.s.o
 microos: CMakeFiles/microos.dir/build.make
 microos: /opt/homebrew/lib/libSDL2.dylib
@@ -147,7 +179,7 @@ microos: /opt/homebrew/Cellar/sdl2_ttf/2.24.0/lib/libSDL2_ttf.dylib
 microos: /opt/homebrew/lib/libSDL2-2.0.0.dylib
 microos: /opt/homebrew/lib/libSDL2_ttf-2.0.0.dylib
 microos: CMakeFiles/microos.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking C executable microos"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking C executable microos"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/microos.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

@@ -36,6 +36,8 @@ set(SOURCES
     microos.c
     filesystem.c
     terminal.c  # Ensure this line is present
+    fileui.c       # Add FileUI implementation
+    editor.c       # Add TextEditor implementation
     ${ASM_SOURCES}
 )
 

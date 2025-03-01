@@ -85,12 +85,12 @@ clean: CMakeFiles/microos.dir/clean
 CMakeFiles/microos.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=1,2,3,4,5 "Built target microos"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target microos"
 .PHONY : CMakeFiles/microos.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/microos.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles 7
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/microos.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles 0
 .PHONY : CMakeFiles/microos.dir/rule
@@ -102,7 +102,7 @@ microos: CMakeFiles/microos.dir/rule
 # codegen rule for target.
 CMakeFiles/microos.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=1,2,3,4,5 "Finished codegen for target microos"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/maximus.farvour/Documents/MicroOS_Assembly/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Finished codegen for target microos"
 .PHONY : CMakeFiles/microos.dir/codegen
 
 # clean rule for target.

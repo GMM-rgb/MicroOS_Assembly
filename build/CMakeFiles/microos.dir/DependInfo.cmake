@@ -20,7 +20,9 @@ set(CMAKE_ASM_TARGET_INCLUDE_PATH
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/Users/maximus.farvour/Documents/MicroOS_Assembly/editor.c" "CMakeFiles/microos.dir/editor.c.o" "gcc" "CMakeFiles/microos.dir/editor.c.o.d"
   "/Users/maximus.farvour/Documents/MicroOS_Assembly/filesystem.c" "CMakeFiles/microos.dir/filesystem.c.o" "gcc" "CMakeFiles/microos.dir/filesystem.c.o.d"
+  "/Users/maximus.farvour/Documents/MicroOS_Assembly/fileui.c" "CMakeFiles/microos.dir/fileui.c.o" "gcc" "CMakeFiles/microos.dir/fileui.c.o.d"
   "/Users/maximus.farvour/Documents/MicroOS_Assembly/microos.c" "CMakeFiles/microos.dir/microos.c.o" "gcc" "CMakeFiles/microos.dir/microos.c.o.d"
   "/Users/maximus.farvour/Documents/MicroOS_Assembly/terminal.c" "CMakeFiles/microos.dir/terminal.c.o" "gcc" "CMakeFiles/microos.dir/terminal.c.o.d"
   )
