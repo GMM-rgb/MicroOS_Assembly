@@ -8,62 +8,60 @@ section .text
     global initialize_display_memory
     global update_display
 
-; void initialize_display_memory(unsigned char *display_memory)
 initialize_display_memory:
     push rbp
     mov rbp, rsp
-
-    push rbx                  ; Save RBX (callee-saved register)
-    xor rbx, rbx              ; Clear counter
+    push rbx
+    xor rbx, rbx
 
 .init_loop:
-    mov byte [rdi + rbx], 0   ; Set each byte in display_memory to 0
+    mov byte [rdi + rbx], 0
     inc rbx
-    cmp rbx, 64               ; Loop 64 times
+    cmp rbx, 64
     jl .init_loop
 
     pop rbx
     pop rbp
     ret
 
-; void update_display(unsigned char *display_memory)
 update_display:
     push rbp
     mov rbp, rsp
+    push rbx
 
-    push rbx                  ; Save RBX
-    mov rbx, 0                ; Clear counter
+    ; Load and increment tick using RIP-relative addressing
+    lea rbx, [rel tick]
+    mov rax, [rbx]
+    inc rax
+    mov [rbx], rax
 
-    ; Increment static tick counter
-    mov rax, [tick]           ; Load tick
-    inc rax                   ; Increment tick
-    mov [tick], rax           ; Save updated tick
+    xor rbx, rbx
 
 .update_loop:
-    mov al, [rdi + rbx]       ; Load current byte
-    inc al                    ; Increment byte
-    mov [rdi + rbx], al       ; Store incremented byte
+    mov al, [rdi + rbx]
+    inc al
+    mov [rdi + rbx], al
 
-    mov rax, rbx              ; Current index
-    add rax, [tick]           ; Add tick value
+    mov rax, rbx
+    add rax, [rbx]          ; Use 64-bit addressing for tick
     xor rdx, rdx
     mov rcx, 5
-    div rcx                   ; Divide RAX by 5, remainder in RDX
+    div rcx
 
     cmp rdx, 0
-    jne .skip_variation       ; Skip modification if remainder != 0
+    jne .skip_variation
 
-    mov al, [rdi + rbx]       ; Reload current byte
-    add al, 10                ; Add variation
-    mov [rdi + rbx], al       ; Store updated byte
+    mov al, [rdi + rbx]
+    add al, 10
+    mov [rdi + rbx], al
 
 .skip_variation:
     inc rbx
     cmp rbx, 64
-    jl .update_loop           ; Repeat for all 64 bytes
+    jl .update_loop
 
     pop rbx
     pop rbp
     ret
 
-section .note.GNU-stack noalloc noexec nowrite progbits
+; section .note.GNU-stack noalloc noexec nowrite progbits
