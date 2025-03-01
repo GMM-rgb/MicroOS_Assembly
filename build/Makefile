@@ -298,6 +298,30 @@ microos.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/microos.c.s
 .PHONY : microos.c.s
 
+settings.o: settings.c.o
+.PHONY : settings.o
+
+# target to build an object file
+settings.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/settings.c.o
+.PHONY : settings.c.o
+
+settings.i: settings.c.i
+.PHONY : settings.i
+
+# target to preprocess a source file
+settings.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/settings.c.i
+.PHONY : settings.c.i
+
+settings.s: settings.c.s
+.PHONY : settings.s
+
+# target to generate assembly for a file
+settings.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/settings.c.s
+.PHONY : settings.c.s
+
 terminal.o: terminal.c.o
 .PHONY : terminal.o
 
@@ -350,6 +374,9 @@ help:
 	@echo "... microos.o"
 	@echo "... microos.i"
 	@echo "... microos.s"
+	@echo "... settings.o"
+	@echo "... settings.i"
+	@echo "... settings.s"
 	@echo "... terminal.o"
 	@echo "... terminal.i"
 	@echo "... terminal.s"

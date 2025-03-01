@@ -38,6 +38,7 @@ set(SOURCES
     terminal.c  # Ensure this line is present
     fileui.c       # Add FileUI implementation
     editor.c       # Add TextEditor implementation
+    settings.c         # <-- Added to compile settings functions
     ${ASM_SOURCES}
 )
 

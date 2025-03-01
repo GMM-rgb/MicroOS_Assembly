@@ -8,6 +8,7 @@
 #include "terminal.h"
 #include "fileui.h"
 #include "editor.h"  // Ensure this include is present
+#include "settings.h"
 
 // Function declarations for assembly routines
 extern void initialize_display_memory(unsigned char *display_memory);
@@ -33,6 +34,7 @@ typedef struct
     Terminal* terminal;
     FileUI* fileui;
     TextEditor* editor;
+    SystemSettings settings;
 } Application;
 
 // Add a function to visualize the display memory pattern
@@ -409,6 +411,110 @@ void draw_start_menu(SDL_Renderer *renderer, TTF_Font *font)
     }
 }
 
+void draw_settings_page(SDL_Renderer* renderer, TTF_Font* font, SDL_Rect content_area, 
+                       Application* app, const char* page) {
+    if (strcmp(page, "Display") == 0) {
+        int y = content_area.y + 10;
+        SDL_Color textColor = {0, 0, 0, 255};
+
+        // Resolution selector
+        const char* resolutions[] = {"144p", "360p", "480p", "720p", "1080p"};
+        SDL_Surface* surface = TTF_RenderText_Solid(font, "Resolution:", textColor);
+        if (surface) {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+            SDL_Rect textRect = {content_area.x + 10, y, surface->w, surface->h};
+            SDL_RenderCopy(renderer, texture, NULL, &textRect);
+            SDL_DestroyTexture(texture);
+            SDL_FreeSurface(surface);
+        }
+        y += 30;
+
+        for (int i = 0; i < 5; i++) {
+            SDL_Rect button = {content_area.x + 10, y, 100, 25};
+            SDL_SetRenderDrawColor(renderer, 
+                app->settings.resolution == i ? 200 : 230,
+                app->settings.resolution == i ? 200 : 230,
+                app->settings.resolution == i ? 200 : 230, 255);
+            SDL_RenderFillRect(renderer, &button);
+
+            surface = TTF_RenderText_Solid(font, resolutions[i], textColor);
+            if (surface) {
+                SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+                SDL_Rect textRect = {button.x + 5, button.y + 5, surface->w, surface->h};
+                SDL_RenderCopy(renderer, texture, NULL, &textRect);
+                SDL_DestroyTexture(texture);
+                SDL_FreeSurface(surface);
+            }
+            y += 35;
+        }
+
+        // Theme selector
+        y += 20;
+        surface = TTF_RenderText_Solid(font, "Color Theme:", textColor);
+        if (surface) {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+            SDL_Rect textRect = {content_area.x + 10, y, surface->w, surface->h};
+            SDL_RenderCopy(renderer, texture, NULL, &textRect);
+            SDL_DestroyTexture(texture);
+            SDL_FreeSurface(surface);
+        }
+        y += 30;
+
+        const char* themes[] = {"Default", "Cyan", "Grayscale"};
+        for (int i = 0; i < 3; i++) {
+            SDL_Rect button = {content_area.x + 10, y, 100, 25};
+            SDL_SetRenderDrawColor(renderer, 
+                app->settings.theme == i ? 200 : 230,
+                app->settings.theme == i ? 200 : 230,
+                app->settings.theme == i ? 200 : 230, 255);
+            SDL_RenderFillRect(renderer, &button);
+
+            surface = TTF_RenderText_Solid(font, themes[i], textColor);
+            if (surface) {
+                SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+                SDL_Rect textRect = {button.x + 5, button.y + 5, surface->w, surface->h};
+                SDL_RenderCopy(renderer, texture, NULL, &textRect);
+                SDL_DestroyTexture(texture);
+                SDL_FreeSurface(surface);
+            }
+            y += 35;
+        }
+
+        // UI Scale slider
+        y += 20;
+        surface = TTF_RenderText_Solid(font, "UI Scale:", textColor);
+        if (surface) {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+            SDL_Rect textRect = {content_area.x + 10, y, surface->w, surface->h};
+            SDL_RenderCopy(renderer, texture, NULL, &textRect);
+            SDL_DestroyTexture(texture);
+            SDL_FreeSurface(surface);
+        }
+        y += 30;
+
+        // Draw slider
+        SDL_Rect slider = {content_area.x + 10, y, 200, 10};
+        SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
+        SDL_RenderFillRect(renderer, &slider);
+
+        float knobPos = (app->settings.ui_scale - 1.0f) * 200.0f;
+        SDL_Rect knob = {content_area.x + 10 + (int)knobPos, y - 5, 20, 20};
+        SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
+        SDL_RenderFillRect(renderer, &knob);
+
+        char scaleText[32];
+        snprintf(scaleText, sizeof(scaleText), "%.0f%%", app->settings.ui_scale * 100);
+        surface = TTF_RenderText_Solid(font, scaleText, textColor);
+        if (surface) {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+            SDL_Rect textRect = {content_area.x + 220, y - 5, surface->w, surface->h};
+            SDL_RenderCopy(renderer, texture, NULL, &textRect);
+            SDL_DestroyTexture(texture);
+            SDL_FreeSurface(surface);
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -621,6 +727,45 @@ int main(int argc, char *argv[])
                 if (editor_handle_event(apps[2].editor, &e)) {
                     // Event was handled by text editor
                     continue;
+                }
+            }
+            else if (currentState == OS_STATE_APP2 && strcmp(currentAppName, "Settings") == 0) {
+                if (e.type == SDL_MOUSEBUTTONDOWN) {
+                    int x = e.button.x;
+                    int y = e.button.y;
+                    
+                    // Check for resolution buttons
+                    for (int i = 0; i < 5; i++) {
+                        SDL_Rect button = {35, 90 + i * 35, 100, 25};
+                        if (x >= button.x && x <= button.x + button.w &&
+                            y >= button.y && y <= button.y + button.h) {
+                            apps[0].settings.resolution = i;
+                            settings_apply_resolution(&apps[0].settings, window);
+                            break;
+                        }
+                    }
+
+                    // Check for theme buttons
+                    for (int i = 0; i < 3; i++) {
+                        SDL_Rect button = {35, 230 + i * 35, 100, 25};
+                        if (x >= button.x && x <= button.x + button.w &&
+                            y >= button.y && y <= button.y + button.h) {
+                            apps[0].settings.theme = i;
+                            settings_apply_theme(&apps[0].settings);
+                            break;
+                        }
+                    }
+                }
+                // Handle UI scale slider dragging
+                else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                    int sliderY = 320;
+                    if (e.button.y >= sliderY - 5 && e.button.y <= sliderY + 15) {
+                        float scale = 1.0f + (e.button.x - 45) / 200.0f;
+                        if (scale >= 1.0f && scale <= 2.0f) {
+                            apps[0].settings.ui_scale = scale;
+                            settings_apply_resolution(&apps[0].settings, window);
+                        }
+                    }
                 }
             }
         }
