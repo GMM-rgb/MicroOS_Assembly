@@ -213,6 +213,24 @@ void editor_render(TextEditor* editor, SDL_Renderer* renderer, TTF_Font* font) {
     SDL_RenderDrawLine(renderer, closeBtn.x + 20, closeBtn.y + 5, closeBtn.x + 5, closeBtn.y + 20);
 }
 
+// Add a helper function to delete a word
+static void editor_delete_word(TextEditor* editor) {
+    DocumentLine* line = &editor->lines[editor->cursor_line];
+    if (editor->cursor_col == 0) return;
+
+    int start = editor->cursor_col - 1;
+    while (start > 0 && line->text[start] == ' ') start--;
+    while (start > 0 && line->text[start] != ' ') start--;
+
+    if (line->text[start] == ' ') start++;
+
+    int length = editor->cursor_col - start;
+    memmove(line->text + start, line->text + editor->cursor_col, line->length - editor->cursor_col + 1);
+    line->length -= length;
+    editor->cursor_col = start;
+    editor->has_changes = true;
+}
+
 // Handle events for the TextEditor window (return true if event handled)
 bool editor_handle_event(TextEditor* editor, SDL_Event* event, FileSystem* fs) {
     if (event->type == SDL_MOUSEBUTTONDOWN) {
@@ -240,6 +258,21 @@ bool editor_handle_event(TextEditor* editor, SDL_Event* event, FileSystem* fs) {
                editor->is_open = false;
                return true;
            }
+    } else if (event->type == SDL_KEYDOWN) {
+        if (event->key.keysym.sym == SDLK_BACKSPACE) {
+            if (SDL_GetModState() & KMOD_CTRL) {
+                editor_delete_word(editor);
+            } else {
+                DocumentLine* line = &editor->lines[editor->cursor_line];
+                if (editor->cursor_col > 0) {
+                    memmove(line->text + editor->cursor_col - 1, line->text + editor->cursor_col, line->length - editor->cursor_col + 1);
+                    line->length--;
+                    editor->cursor_col--;
+                    editor->has_changes = true;
+                }
+            }
+            return true;
+        }
     }
     return false;
 }
