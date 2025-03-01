@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
+#include "filesystem.h"
 
 // Function declarations for assembly routines
 extern void initialize_display_memory(unsigned char *display_memory);
@@ -25,6 +26,7 @@ typedef struct
     char name[32];
     SDL_Rect icon;
     SDL_Color color;
+    FileSystem* fs;  // Add this field
 } Application;
 
 // Add a function to visualize the display memory pattern
@@ -263,7 +265,7 @@ void draw_boot_sequence(SDL_Renderer *renderer, TTF_Font *font, int progress, un
     }
 }
 
-void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_Color appColor, unsigned char *display_memory)
+void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_Color appColor, unsigned char *display_memory, FileSystem* fs)
 {
     // App window background
     SDL_Rect windowRect = {20, 20, 280, 240};
@@ -277,7 +279,7 @@ void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_C
 
     // App title
     SDL_Color textColor = {255, 255, 255, 255};
-    SDL_Surface *textSurface = TTF_RenderText_Solid(font, appName, textColor);
+    SDL_Surface *textSurface = TTF_RenderText_Solid(font, appName);
     if (textSurface != NULL)
     {
         SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
@@ -394,6 +396,42 @@ void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_C
                 fprintf(stderr, "TTF_RenderText_Solid Error: %s\n", TTF_GetError());
             }
         }
+    }
+    else if (strcmp(appName, "Files") == 0) {
+        // File list area
+        SDL_Rect listRect = {35, 60, 250, 185};
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderFillRect(renderer, &listRect);
+        
+        // Get current directory contents
+        FileNode** files;
+        int file_count;
+        fs_list_directory(fs, fs_get_current_path(fs), &files, &file_count);
+        
+        // Draw files and directories
+        for (int i = 0; i < file_count; i++) {
+            SDL_Color itemColor = files[i]->is_directory ? 
+                (SDL_Color){70, 70, 200, 255} : (SDL_Color){0, 0, 0, 255};
+                
+            char info[256];
+            snprintf(info, sizeof(info), "%s  %s  %s", 
+                    files[i]->name,
+                    fs_format_size(files[i]->size),
+                    fs_format_time(files[i]->modified));
+                    
+            SDL_Surface* textSurface = TTF_RenderText_Solid(font, info, itemColor);
+            if (textSurface != NULL) {
+                SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+                if (textTexture != NULL) {
+                    SDL_Rect textRect = {40, 65 + i * 20, textSurface->w, textSurface->h};
+                    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+                    SDL_DestroyTexture(textTexture);
+                }
+                SDL_FreeSurface(textSurface);
+            }
+        }
+        
+        free(files);
     }
 }
 
@@ -523,6 +561,9 @@ int main(int argc, char *argv[])
     strcpy(apps[2].name, "Files");
     apps[2].icon = (SDL_Rect){240, 40, 50, 50};
     apps[2].color = (SDL_Color){50, 150, 50, 255};
+
+    FileSystem* fs = fs_init();
+    apps[2].fs = fs;  // Assign to Files app
 
     OSState currentState = OS_STATE_BOOT;
     int bootProgress = 0;
@@ -676,7 +717,7 @@ int main(int argc, char *argv[])
         case OS_STATE_APP2:
             draw_desktop(renderer, font, apps, 3);
             draw_taskbar(renderer, font);
-            draw_app(renderer, font, currentAppName, currentAppColor, display_memory);
+            draw_app(renderer, font, currentAppName, currentAppColor, display_memory, apps[2].fs);
             break;
 
         default:
