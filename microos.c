@@ -157,6 +157,42 @@ void draw_taskbar(SDL_Renderer *renderer, TTF_Font *font)
     }
 }
 
+void draw_terminal_icon(SDL_Renderer* renderer, SDL_Rect icon_rect) {
+    // Draw terminal icon background (black rectangle)
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &icon_rect);
+    
+    // Calculate prompt symbol position (centered)
+    int prompt_width = 20;  // Width of the prompt symbol
+    int prompt_height = 20; // Height of the prompt symbol
+    
+    int x = icon_rect.x + (icon_rect.w - prompt_width) / 2;
+    int y = icon_rect.y + (icon_rect.h - prompt_height) / 2;
+    
+    // Draw the ">" symbol in green
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    
+    // Draw the ">" symbol using lines
+    SDL_RenderDrawLine(renderer, x, y, x + prompt_width/2, y + prompt_height/2);
+    SDL_RenderDrawLine(renderer, x + prompt_width/2, y + prompt_height/2, x, y + prompt_height);
+    
+    // Draw the "..." (three dots)
+    int dot_size = 3;
+    int dot_spacing = 5;
+    int dots_start_x = x + prompt_width/2 + 5;
+    int dots_y = y + prompt_height/2;
+    
+    for (int i = 0; i < 3; i++) {
+        SDL_Rect dot = {
+            dots_start_x + i * dot_spacing,
+            dots_y - dot_size/2,
+            dot_size,
+            dot_size
+        };
+        SDL_RenderFillRect(renderer, &dot);
+    }
+}
+
 void draw_desktop(SDL_Renderer *renderer, TTF_Font *font, Application *apps, int appCount)
 {
     // Draw desktop background
@@ -170,6 +206,11 @@ void draw_desktop(SDL_Renderer *renderer, TTF_Font *font, Application *apps, int
     {
         // Draw icon background
         draw_rounded_rect(renderer, apps[i].icon, 5, apps[i].color);
+
+        // For Terminal app (index 0), draw the special terminal icon
+        if (i == 0) {  // Terminal is the first app
+            draw_terminal_icon(renderer, apps[i].icon);
+        }
 
         // Draw icon text
         SDL_Surface *textSurface = TTF_RenderText_Solid(font, apps[i].name, textColor);
