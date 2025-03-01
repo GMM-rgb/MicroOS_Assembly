@@ -1,5 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/microos.dir/display_functions.s.o"
+  "CMakeFiles/microos.dir/filesystem.c.o"
+  "CMakeFiles/microos.dir/filesystem.c.o.d"
   "CMakeFiles/microos.dir/microos.c.o"
   "CMakeFiles/microos.dir/microos.c.o.d"
   "microos"

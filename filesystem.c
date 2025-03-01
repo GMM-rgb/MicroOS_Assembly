@@ -90,4 +90,106 @@ FileNode* fs_create_file(FileSystem* fs, const char* path, bool is_directory) {
     return new_node;
 }
 
+void fs_list_directory(FileSystem* fs, const char* path, FileNode*** files, int* count) {
+    FileNode* dir = fs_get_file(fs, path);
+    if (dir && dir->is_directory) {
+        *files = dir->children;
+        *count = dir->child_count;
+    } else {
+        *files = NULL;
+        *count = 0;
+    }
+}
+
+FileNode* fs_get_file(FileSystem* fs, const char* path) {
+    int count;
+    char** parts = split_path(path, &count);
+    
+    FileNode* current = fs->root;
+    
+    for (int i = 0; i < count; i++) {
+        bool found = false;
+        for (int j = 0; j < current->child_count; j++) {
+            if (strcmp(current->children[j]->name, parts[i]) == 0) {
+                current = current->children[j];
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            current = NULL;
+            break;
+        }
+    }
+    
+    for (int i = 0; i < count; i++) {
+        free(parts[i]);
+    }
+    free(parts);
+    
+    return current;
+}
+
+bool fs_write_file(FileSystem* fs, const char* path, const char* content) {
+    FileNode* file = fs_get_file(fs, path);
+    if (file && !file->is_directory) {
+        strncpy(file->content, content, MAX_CONTENT);
+        file->size = strlen(content);
+        file->modified = time(NULL);
+        return true;
+    }
+    return false;
+}
+
+char* fs_read_file(FileSystem* fs, const char* path) {
+    FileNode* file = fs_get_file(fs, path);
+    if (file && !file->is_directory) {
+        return file->content;
+    }
+    return NULL;
+}
+
+char* fs_format_size(size_t size) {
+    static char buffer[20];
+    if (size < 1024) {
+        snprintf(buffer, sizeof(buffer), "%zu B", size);
+    } else if (size < 1024 * 1024) {
+        snprintf(buffer, sizeof(buffer), "%.2f KB", size / 1024.0);
+    } else {
+        snprintf(buffer, sizeof(buffer), "%.2f MB", size / (1024.0 * 1024.0));
+    }
+    return buffer;
+}
+
+char* fs_format_time(time_t time) {
+    static char buffer[20];
+    struct tm* tm_info = localtime(&time);
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M", tm_info);
+    return buffer;
+}
+
+char* fs_get_current_path(FileSystem* fs) {
+    static char path[MAX_PATH];
+    FileNode* current = fs->current_dir;
+    path[0] = '\0';
+    
+    while (current != NULL) {
+        char temp[MAX_PATH];
+        snprintf(temp, sizeof(temp), "/%s%s", current->name, path);
+        strcpy(path, temp);
+        current = current->parent;
+    }
+    
+    return path;
+}
+
+bool fs_change_dir(FileSystem* fs, const char* path) {
+    FileNode* dir = fs_get_file(fs, path);
+    if (dir && dir->is_directory) {
+        fs->current_dir = dir;
+        return true;
+    }
+    return false;
+}
+
 // ... Add other filesystem function implementations ...

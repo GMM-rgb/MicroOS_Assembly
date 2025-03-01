@@ -202,6 +202,30 @@ display_functions.s.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/display_functions.s.o
 .PHONY : display_functions.s.o
 
+filesystem.o: filesystem.c.o
+.PHONY : filesystem.o
+
+# target to build an object file
+filesystem.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/filesystem.c.o
+.PHONY : filesystem.c.o
+
+filesystem.i: filesystem.c.i
+.PHONY : filesystem.i
+
+# target to preprocess a source file
+filesystem.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/filesystem.c.i
+.PHONY : filesystem.c.i
+
+filesystem.s: filesystem.c.s
+.PHONY : filesystem.s
+
+# target to generate assembly for a file
+filesystem.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/filesystem.c.s
+.PHONY : filesystem.c.s
+
 microos.o: microos.c.o
 .PHONY : microos.o
 
@@ -242,6 +266,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... microos"
 	@echo "... display_functions.o"
+	@echo "... filesystem.o"
+	@echo "... filesystem.i"
+	@echo "... filesystem.s"
 	@echo "... microos.o"
 	@echo "... microos.i"
 	@echo "... microos.s"

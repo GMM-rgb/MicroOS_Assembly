@@ -34,6 +34,7 @@ find_package(SDL2_ttf REQUIRED)
 # Source files
 set(SOURCES
     microos.c
+    filesystem.c  # Add this line
 )
 
 # Determine whether to use assembly or C implementation

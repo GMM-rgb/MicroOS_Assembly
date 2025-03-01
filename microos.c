@@ -279,7 +279,7 @@ void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_C
 
     // App title
     SDL_Color textColor = {255, 255, 255, 255};
-    SDL_Surface *textSurface = TTF_RenderText_Solid(font, appName);
+    SDL_Surface *textSurface = TTF_RenderText_Solid(font, appName, textColor);  // Add textColor argument
     if (textSurface != NULL)
     {
         SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
