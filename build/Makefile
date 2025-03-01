@@ -250,6 +250,30 @@ microos.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/microos.c.s
 .PHONY : microos.c.s
 
+terminal.o: terminal.c.o
+.PHONY : terminal.o
+
+# target to build an object file
+terminal.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/terminal.c.o
+.PHONY : terminal.c.o
+
+terminal.i: terminal.c.i
+.PHONY : terminal.i
+
+# target to preprocess a source file
+terminal.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/terminal.c.i
+.PHONY : terminal.c.i
+
+terminal.s: terminal.c.s
+.PHONY : terminal.s
+
+# target to generate assembly for a file
+terminal.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/terminal.c.s
+.PHONY : terminal.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -272,6 +296,9 @@ help:
 	@echo "... microos.o"
 	@echo "... microos.i"
 	@echo "... microos.s"
+	@echo "... terminal.o"
+	@echo "... terminal.i"
+	@echo "... terminal.s"
 .PHONY : help
 
 

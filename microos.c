@@ -5,6 +5,7 @@
 #include <time.h>
 #include <string.h>
 #include "filesystem.h"
+#include "terminal.h"
 
 // Function declarations for assembly routines
 extern void initialize_display_memory(unsigned char *display_memory);
@@ -27,6 +28,7 @@ typedef struct
     SDL_Rect icon;
     SDL_Color color;
     FileSystem* fs;  // Add this field
+    Terminal* terminal;
 } Application;
 
 // Add a function to visualize the display memory pattern
@@ -265,7 +267,9 @@ void draw_boot_sequence(SDL_Renderer *renderer, TTF_Font *font, int progress, un
     }
 }
 
-void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_Color appColor, unsigned char *display_memory, FileSystem* fs)
+// Update function declaration to include apps parameter
+void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_Color appColor, 
+             unsigned char *display_memory, FileSystem* fs, Application* apps)
 {
     // App window background
     SDL_Rect windowRect = {20, 20, 280, 240};
@@ -317,52 +321,8 @@ void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_C
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderFillRect(renderer, &contentRect);
 
-        const char *lines[] = {
-            "MicroOS Terminal v1.0",
-            "> _"};
-
-        for (int i = 0; i < 2; i++)
-        {
-            SDL_Color terminalText = {0, 255, 0, 255};
-            SDL_Surface *textSurface = TTF_RenderText_Solid(font, lines[i], terminalText);
-            if (textSurface != NULL)
-            {
-                SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-                if (textTexture != NULL)
-                {
-                    SDL_Rect lineRect = {30, 60 + i * 25, textSurface->w, textSurface->h};
-                    SDL_RenderCopy(renderer, textTexture, NULL, &lineRect);
-                    SDL_DestroyTexture(textTexture);
-                }
-                SDL_FreeSurface(textSurface);
-            }
-            else
-            {
-                fprintf(stderr, "TTF_RenderText_Solid Error: %s\n", TTF_GetError());
-            }
-        }
-
-        // Render the display memory visualization in the terminal
-        render_display_memory(renderer, display_memory);
-
-        // Add a label for the display visualization
-        SDL_Color terminalText = {0, 255, 0, 255};
-        textSurface = TTF_RenderText_Solid(font, "Display Memory:", terminalText);
-        if (textSurface != NULL)
-        {
-            SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-            if (textTexture != NULL)
-            {
-                SDL_Rect labelRect = {30, 85, textSurface->w, textSurface->h};
-                SDL_RenderCopy(renderer, textTexture, NULL, &labelRect);
-                SDL_DestroyTexture(textTexture);
-            }
-            SDL_FreeSurface(textSurface);
-        }
-        else
-        {
-            fprintf(stderr, "TTF_RenderText_Solid Error: %s\n", TTF_GetError());
-        }
+        // Render terminal content
+        terminal_render(apps[0].terminal, renderer, font, contentRect);
     }
     else if (strcmp(appName, "Settings") == 0)
     {
@@ -565,6 +525,9 @@ int main(int argc, char *argv[])
     FileSystem* fs = fs_init();
     apps[2].fs = fs;  // Assign to Files app
 
+    // After initializing apps array:
+    apps[0].terminal = terminal_create(fs);
+
     OSState currentState = OS_STATE_BOOT;
     int bootProgress = 0;
     bool showMenu = false;
@@ -668,6 +631,9 @@ int main(int argc, char *argv[])
                     }
                 }
             }
+            else if (e.type == SDL_KEYDOWN && currentState == OS_STATE_APP1) {
+                terminal_handle_keypress(apps[0].terminal, &e.key);
+            }
         }
 
         // Update logic
@@ -717,7 +683,7 @@ int main(int argc, char *argv[])
         case OS_STATE_APP2:
             draw_desktop(renderer, font, apps, 3);
             draw_taskbar(renderer, font);
-            draw_app(renderer, font, currentAppName, currentAppColor, display_memory, apps[2].fs);
+            draw_app(renderer, font, currentAppName, currentAppColor, display_memory, apps[2].fs, apps);
             break;
 
         default:

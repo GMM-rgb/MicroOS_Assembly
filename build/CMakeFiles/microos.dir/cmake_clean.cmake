@@ -4,6 +4,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/microos.dir/filesystem.c.o.d"
   "CMakeFiles/microos.dir/microos.c.o"
   "CMakeFiles/microos.dir/microos.c.o.d"
+  "CMakeFiles/microos.dir/terminal.c.o"
+  "CMakeFiles/microos.dir/terminal.c.o.d"
   "microos"
   "microos.pdb"
 )

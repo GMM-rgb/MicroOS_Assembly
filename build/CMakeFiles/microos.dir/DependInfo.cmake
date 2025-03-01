@@ -22,6 +22,7 @@ set(CMAKE_ASM_TARGET_INCLUDE_PATH
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/maximus.farvour/Documents/MicroOS_Assembly/filesystem.c" "CMakeFiles/microos.dir/filesystem.c.o" "gcc" "CMakeFiles/microos.dir/filesystem.c.o.d"
   "/Users/maximus.farvour/Documents/MicroOS_Assembly/microos.c" "CMakeFiles/microos.dir/microos.c.o" "gcc" "CMakeFiles/microos.dir/microos.c.o.d"
+  "/Users/maximus.farvour/Documents/MicroOS_Assembly/terminal.c" "CMakeFiles/microos.dir/terminal.c.o" "gcc" "CMakeFiles/microos.dir/terminal.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.
