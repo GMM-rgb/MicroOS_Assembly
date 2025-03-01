@@ -936,6 +936,15 @@ int main(int argc, char *argv[])
                             break;
                         }
                     }
+
+                    // Check for close button in settings sidebar
+                    int win_w, win_h;
+                    SDL_GetWindowSize(window, &win_w, &win_h);
+                    SDL_Rect closeButtonRect = {win_w / 2 - 30, 10, 20, 20};
+                    if (x >= closeButtonRect.x && x <= closeButtonRect.x + closeButtonRect.w &&
+                        y >= closeButtonRect.y && y <= closeButtonRect.y + closeButtonRect.h) {
+                        showSettingsMenu = false;
+                    }
                 }
                 // Handle UI scale slider dragging
                 else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
@@ -960,6 +969,12 @@ int main(int argc, char *argv[])
             // Handle text input for document editor
             if (e.type == SDL_TEXTINPUT && currentState == OS_STATE_APP3) {
                 editor_insert_text(apps[2].editor, e.text.text);
+            }
+            // Handle window resize event
+            else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED) {
+                int w, h;
+                SDL_GetWindowSize(window, &w, &h);
+                SDL_RenderSetLogicalSize(renderer, w, h);
             }
         }
 

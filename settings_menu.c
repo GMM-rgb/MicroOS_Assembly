@@ -22,6 +22,14 @@ void draw_settings_menu(SDL_Renderer* renderer, TTF_Font* font, SystemSettings* 
         SDL_DestroyTexture(headerTex);
         SDL_FreeSurface(headerSurf);
     }
+
+    // Draw close button
+    SDL_Rect closeButtonRect = {sidebar.w - 30, 10, 20, 20};
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &closeButtonRect);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawLine(renderer, closeButtonRect.x + 5, closeButtonRect.y + 5, closeButtonRect.x + 15, closeButtonRect.y + 15);
+    SDL_RenderDrawLine(renderer, closeButtonRect.x + 15, closeButtonRect.y + 5, closeButtonRect.x + 5, closeButtonRect.y + 15);
     
     // Draw resolution selector
     int y = 50;
