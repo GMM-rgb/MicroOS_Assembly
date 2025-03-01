@@ -481,13 +481,26 @@ int main(int argc, char *argv[])
             font = TTF_OpenFont("/Library/Fonts/Arial.ttf", 14);
             if (font == NULL)
             {
-                fprintf(stderr, "TTF_OpenFont Error: %s\n", TTF_GetError());
-                fprintf(stderr, "Unable to load any fonts. Exiting...\n");
-                SDL_DestroyRenderer(renderer);
-                SDL_DestroyWindow(window);
-                TTF_Quit();
-                SDL_Quit();
-                return 1;
+                // Try loading font in common MacOS locations
+                font = TTF_OpenFont("/System/Library/Fonts/Helvetica.ttf", 14);
+                if (font == NULL) {
+                    font = TTF_OpenFont("/System/Library/Fonts/SFNS.ttf", 14);
+                    if (font == NULL) {
+                        font = TTF_OpenFont("/System/Library/Fonts/SFNSText.ttf", 14);
+                        if (font == NULL) {
+                            font = TTF_OpenFont("/System/Library/Fonts/AppleSDGothicNeo.ttc", 14);
+                            if (font == NULL) {
+                                fprintf(stderr, "TTF_OpenFont Error: %s\n", TTF_GetError());
+                                fprintf(stderr, "Unable to load any fonts. Exiting...\n");
+                                SDL_DestroyRenderer(renderer);
+                                SDL_DestroyWindow(window);
+                                TTF_Quit();
+                                SDL_Quit();
+                                return 1;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
