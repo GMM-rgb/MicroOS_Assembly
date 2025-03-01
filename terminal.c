@@ -89,7 +89,7 @@ void terminal_execute_command(Terminal* term) {
         terminal_add_line(term, "  pwd           - Print working directory");
         terminal_add_line(term, "  dir           - List files and directories in current directory");
         terminal_add_line(term, "  nedir <dir>   - Create a new directory");
-        terminal_add_line(term, "  reboot          - Reboots / Restarts the system");
+        terminal_add_line(term, "  reboot        - Reboots / Restarts the system");
     } else if (strcmp(command, "ls") == 0 || strcmp(command, "dir") == 0) {
         FileNode** files;
         int count;
