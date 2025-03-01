@@ -10,6 +10,7 @@
 #include "editor.h"  // Ensure this include is present
 #include "settings.h"
 #include "microos.h"
+#include "settings_menu.h"  // Add new settings menu header
 
 // OS State
 typedef enum
@@ -687,26 +688,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Update window creation to enable high DPI support
-    SDL_Window *window = SDL_CreateWindow("MicroOS", 
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-        320, 320, 
-        SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
-
-    // Update renderer creation with better quality flags
+    // Create a resizable window.
+    SDL_Window *window = SDL_CreateWindow("MicroOS", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+                                            640, 480,   // Default size
+                                            SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1,
-        SDL_RENDERER_ACCELERATED | 
-        SDL_RENDERER_PRESENTVSYNC | 
-        SDL_RENDERER_TARGETTEXTURE);
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
     
     if (renderer) {
         // Enable anti-aliasing and better scaling quality
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");  // Use best quality scaling
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
         SDL_SetHint(SDL_HINT_RENDER_LINE_METHOD, "3");  // Use anti-aliased lines
-        
-        // Set logical size to maintain aspect ratio
-        SDL_RenderSetLogicalSize(renderer, 320, 320);
     }
 
     TTF_Font *font = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 14);
@@ -789,6 +782,9 @@ int main(int argc, char *argv[])
 
     init_menu_animations();
 
+    // New global flag for settings sidebar
+    bool showSettingsMenu = false;
+
     while (running)
     {
         while (SDL_PollEvent(&e))
@@ -839,9 +835,9 @@ int main(int argc, char *argv[])
                             }
                             else if (i == 1)
                             {
-                                currentState = OS_STATE_APP2;
-                                strcpy(currentAppName, "Settings");
-                                currentAppColor = apps[i].color;
+                                // For Settings icon, instead of full app launch show sidebar
+                                showSettingsMenu = true;
+                                // You can also clear other states if needed
                             } else if (i == 2) {
                                 currentState = OS_STATE_APP3;
                                 strcpy(currentAppName, "Document Editor");
@@ -994,6 +990,11 @@ int main(int argc, char *argv[])
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
+        // Update logical size each frame to auto adjust on window resize:
+        int w, h;
+        SDL_GetWindowSize(window, &w, &h);
+        SDL_RenderSetLogicalSize(renderer, w, h);
+
         // Render based on current state
         switch (currentState)
         {
@@ -1007,6 +1008,11 @@ int main(int argc, char *argv[])
             if (showMenu)
             {
                 draw_start_menu(renderer, font);
+            }
+            // NEW: if settings sidebar is active, draw it on top
+            if (showSettingsMenu) {
+                SDL_Rect winRect = {0, 0, w, h};
+                draw_settings_menu(renderer, font, &apps[1].settings, winRect);
             }
             break;
 

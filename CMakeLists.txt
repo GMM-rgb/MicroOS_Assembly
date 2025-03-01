@@ -39,6 +39,7 @@ set(SOURCES
     fileui.c
     editor.c
     settings.c
+    settings_menu.c  # Add this line
     ${ASM_SOURCES}
 )
 

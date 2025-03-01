@@ -10,6 +10,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/microos.dir/microos.c.o.d"
   "CMakeFiles/microos.dir/settings.c.o"
   "CMakeFiles/microos.dir/settings.c.o.d"
+  "CMakeFiles/microos.dir/settings_menu.c.o"
+  "CMakeFiles/microos.dir/settings_menu.c.o.d"
   "CMakeFiles/microos.dir/terminal.c.o"
   "CMakeFiles/microos.dir/terminal.c.o.d"
   "microos"

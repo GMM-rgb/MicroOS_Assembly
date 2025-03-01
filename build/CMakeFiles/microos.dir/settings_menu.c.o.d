@@ -1,5 +1,6 @@
-CMakeFiles/microos.dir/microos.c.o: \
-  /Users/maximus.farvour/Documents/MicroOS_Assembly/microos.c \
+CMakeFiles/microos.dir/settings_menu.c.o: \
+  /Users/maximus.farvour/Documents/MicroOS_Assembly/settings_menu.c \
+  /Users/maximus.farvour/Documents/MicroOS_Assembly/settings_menu.h \
   /opt/homebrew/include/SDL2/SDL.h /opt/homebrew/include/SDL2/SDL_main.h \
   /opt/homebrew/include/SDL2/SDL_stdinc.h \
   /opt/homebrew/include/SDL2/SDL_config.h \
@@ -216,11 +217,6 @@ CMakeFiles/microos.dir/microos.c.o: \
   /opt/homebrew/include/SDL2/SDL_locale.h \
   /opt/homebrew/include/SDL2/SDL_misc.h \
   /opt/homebrew/include/SDL2/SDL_ttf.h \
-  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/16/include/stdbool.h \
-  /Users/maximus.farvour/Documents/MicroOS_Assembly/filesystem.h \
-  /Users/maximus.farvour/Documents/MicroOS_Assembly/terminal.h \
-  /Users/maximus.farvour/Documents/MicroOS_Assembly/fileui.h \
-  /Users/maximus.farvour/Documents/MicroOS_Assembly/editor.h \
-  /Users/maximus.farvour/Documents/MicroOS_Assembly/settings.h \
   /Users/maximus.farvour/Documents/MicroOS_Assembly/microos.h \
-  /Users/maximus.farvour/Documents/MicroOS_Assembly/settings_menu.h
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/16/include/stdbool.h \
+  /Users/maximus.farvour/Documents/MicroOS_Assembly/settings.h
