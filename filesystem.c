@@ -21,6 +21,19 @@ static char** split_path(const char* path, int* count) {
     return parts;
 }
 
+// New function: computes size of a node.
+// For files, returns file->size. For directories, recursively sums sizes.
+size_t fs_get_size(FileNode* node) {
+    if (!node) return 0;
+    if (!node->is_directory)
+        return node->size;
+    size_t total = 0;
+    for (int i = 0; i < node->child_count; i++) {
+        total += fs_get_size(node->children[i]);
+    }
+    return total;
+}
+
 FileSystem* fs_init(void) {
     FileSystem* fs = malloc(sizeof(FileSystem));
     fs->root = malloc(sizeof(FileNode));
@@ -101,24 +114,34 @@ void fs_list_directory(FileSystem* fs, const char* path, FileNode*** files, int*
     }
 }
 
+// Modified fs_get_file: Supports absolute paths (starting with '/'),
+// relative paths (starting without '/'), and tokens "." and "..".
 FileNode* fs_get_file(FileSystem* fs, const char* path) {
     int count;
     char** parts = split_path(path, &count);
     
-    FileNode* current = fs->root;
+    // Start from root if path begins with '/', otherwise from current directory.
+    FileNode* current = (path[0]=='/') ? fs->root : fs->current_dir;
     
     for (int i = 0; i < count; i++) {
-        bool found = false;
-        for (int j = 0; j < current->child_count; j++) {
-            if (strcmp(current->children[j]->name, parts[i]) == 0) {
-                current = current->children[j];
-                found = true;
+        if (strcmp(parts[i], ".") == 0) {
+            // Do nothing, remain in current directory.
+        } else if (strcmp(parts[i], "..") == 0) {
+            if (current->parent != NULL)
+                current = current->parent;
+        } else {
+            bool found = false;
+            for (int j = 0; j < current->child_count; j++) {
+                if (strcmp(current->children[j]->name, parts[i]) == 0) {
+                    current = current->children[j];
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                current = NULL;
                 break;
             }
-        }
-        if (!found) {
-            current = NULL;
-            break;
         }
     }
     
