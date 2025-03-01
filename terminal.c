@@ -54,7 +54,9 @@ void terminal_execute_command(Terminal* term) {
         terminal_add_line(term, "  touch <file>  - Create empty file");
         terminal_add_line(term, "  clear         - Clear terminal");
         terminal_add_line(term, "  pwd           - Print working directory");
-    } else if (strcmp(command, "ls") == 0) {
+        terminal_add_line(term, "  dir           - List files and directories in current directory");
+        terminal_add_line(term, "  nedir <dir>   - Create a new directory");
+    } else if (strcmp(command, "ls") == 0 || strcmp(command, "dir") == 0) {
         FileNode** files;
         int count;
         fs_list_directory(term->fs, fs_get_current_path(term->fs), &files, &count);
@@ -74,6 +76,12 @@ void terminal_execute_command(Terminal* term) {
             terminal_add_line(term, "Error: Invalid directory");
     } else if (strcmp(command, "pwd") == 0) {
         terminal_add_line(term, fs_get_current_path(term->fs));
+    } else if (strcmp(command, "nedir") == 0) {
+        char* dir = strtok(NULL, " ");
+        if (dir && fs_create_file(term->fs, dir, true))
+            terminal_add_line(term, "Directory created");
+        else
+            terminal_add_line(term, "Error: Could not create directory");
     }
     // Further commands can be added here
 
