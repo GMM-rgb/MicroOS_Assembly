@@ -462,7 +462,7 @@ void draw_start_menu(SDL_Renderer *renderer, TTF_Font *font)
         "Terminal",
         "Settings",
         "File Explorer",
-        "Shutdown"};
+        "Restart"};
 
     SDL_Color textColor = {255, 255, 255, 255};
     for (int i = 0; i < 4; i++)
