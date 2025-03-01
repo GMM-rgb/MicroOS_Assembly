@@ -9,10 +9,7 @@
 #include "fileui.h"
 #include "editor.h"  // Ensure this include is present
 #include "settings.h"
-
-// Function declarations for assembly routines
-extern void initialize_display_memory(unsigned char *display_memory);
-extern void update_display(unsigned char *display_memory);
+#include "microos.h"
 
 // OS State
 typedef enum
@@ -37,6 +34,56 @@ typedef struct
     TextEditor* editor;
     SystemSettings settings;
 } Application;
+
+// Function declarations for assembly routines
+extern void initialize_display_memory(unsigned char *display_memory);
+extern void update_display(unsigned char *display_memory);
+
+// Function declarations
+void draw_rounded_rect(SDL_Renderer *renderer, SDL_Rect rect, int radius, SDL_Color color);
+void draw_rounded_rect_with_shadow(SDL_Renderer* renderer, SDL_Rect rect, int radius, SDL_Color color);
+void render_display_memory(SDL_Renderer *renderer, unsigned char *display_memory);
+void draw_taskbar(SDL_Renderer *renderer, TTF_Font *font);
+void draw_terminal_icon(SDL_Renderer* renderer, SDL_Rect icon_rect);
+void draw_document_icon(SDL_Renderer* renderer, SDL_Rect icon_rect);
+void draw_desktop(SDL_Renderer *renderer, TTF_Font *font, Application *apps, int appCount);
+void draw_boot_sequence(SDL_Renderer *renderer, TTF_Font *font, int progress, unsigned char *display_memory);
+void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_Color appColor, unsigned char *display_memory, FileSystem* fs, Application* apps);
+void draw_start_menu(SDL_Renderer* renderer, TTF_Font* font);
+void draw_settings_page(SDL_Renderer* renderer, TTF_Font* font, SDL_Rect content_area, Application* app, const char* page);
+void init_menu_animations();
+float ease_out_elastic(float t);
+
+// Add these global variables after the OSState declaration
+MenuAnimation menu_anim = {0, 180, 0, 0, false};
+MenuItemAnimation menu_items[MENU_ITEM_COUNT] = {0};
+
+void init_menu_animations() {
+    for (int i = 0; i < MENU_ITEM_COUNT; i++) {
+        menu_items[i].x = -100;  // Start offscreen
+        menu_items[i].y = 110 + i * 40;
+        menu_items[i].target_x = 10;
+        menu_items[i].target_y = 110 + i * 40;
+        menu_items[i].velocity = 0;
+        menu_items[i].is_visible = false;
+    }
+}
+
+float ease_out_elastic(float t) {
+    const float c4 = (2.0f * 3.14159f) / 3.0f;
+    return t == 0 ? 0 : t == 1 ? 1
+        : powf(2, -10 * t) * sinf((t * 10 - 0.75f) * c4) + 1;
+}
+
+void draw_rounded_rect_with_shadow(SDL_Renderer* renderer, SDL_Rect rect, int radius, SDL_Color color) {
+    // Draw shadow
+    SDL_Rect shadowRect = {rect.x + 2, rect.y + 2, rect.w, rect.h};
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 64);
+    draw_rounded_rect(renderer, shadowRect, radius, (SDL_Color){0, 0, 0, 64});
+    
+    // Draw main rectangle
+    draw_rounded_rect(renderer, rect, radius, color);
+}
 
 // Add a function to visualize the display memory pattern
 void render_display_memory(SDL_Renderer *renderer, unsigned char *display_memory)
@@ -450,42 +497,73 @@ void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_C
     }
 }
 
-void draw_start_menu(SDL_Renderer *renderer, TTF_Font *font)
-{
-    // Menu background
-    SDL_Rect menuRect = {5, 100, 150, 180};
+void draw_start_menu(SDL_Renderer* renderer, TTF_Font* font) {
+    Uint32 current_time = SDL_GetTicks();
+    
+    // Update menu height animation
+    if (menu_anim.is_animating) {
+        float progress = (current_time - menu_anim.animation_start) / (float)MENU_ANIMATION_DURATION;
+        if (progress > 1.0f) {
+            progress = 1.0f;
+            menu_anim.is_animating = false;
+        }
+        float eased = ease_out_elastic(progress);
+        menu_anim.current_height = menu_anim.start_height + 
+            (menu_anim.target_height - menu_anim.start_height) * eased;
+    }
+
+    // Menu background with current animated height
+    SDL_Rect menuRect = {5, 100, 150, (int)menu_anim.current_height};
     SDL_Color menuColor = {50, 50, 70, 255};
-    draw_rounded_rect(renderer, menuRect, 5, menuColor);
+    draw_rounded_rect_with_shadow(renderer, menuRect, 10, menuColor);
 
     // Menu items
-    const char *menuItems[] = {
-        "Terminal",
-        "Settings",
-        "File Explorer",
-        "Restart"};
-
+    const char* menuItems[] = {"Terminal", "Settings", "File Explorer", "Restart"};
     SDL_Color textColor = {255, 255, 255, 255};
-    for (int i = 0; i < 4; i++)
-    {
-        SDL_Rect itemRect = {10, 110 + i * 40, 140, 35};
-        SDL_Color itemColor = {70, 70, 90, 255};
-        draw_rounded_rect(renderer, itemRect, 5, itemColor);
+    
+    for (int i = 0; i < MENU_ITEM_COUNT; i++) {
+        // Update item position with spring animation
+        if (menu_items[i].is_visible) {
+            const float spring_constant = 0.3f;
+            const float damping = 0.7f;
+            
+            float dx = menu_items[i].target_x - menu_items[i].x;
+            float dy = menu_items[i].target_y - menu_items[i].y;
+            
+            menu_items[i].velocity += dx * spring_constant;
+            menu_items[i].velocity *= damping;
+            menu_items[i].x += menu_items[i].velocity;
+            
+            // Draw menu item with glow effect
+            SDL_Rect itemRect = {
+                (int)menu_items[i].x, 
+                (int)menu_items[i].y, 
+                140, 35
+            };
+            
+            // Glow effect
+            SDL_Color glowColor = {80, 80, 100, 128};
+            SDL_Rect glowRect = {itemRect.x - 2, itemRect.y - 2, itemRect.w + 4, itemRect.h + 4};
+            draw_rounded_rect(renderer, glowRect, 8, glowColor);
+            
+            // Main button
+            SDL_Color itemColor = {70, 70, 90, 255};
+            draw_rounded_rect_with_shadow(renderer, itemRect, 5, itemColor);
 
-        SDL_Surface *textSurface = TTF_RenderText_Solid(font, menuItems[i], textColor);
-        if (textSurface != NULL)
-        {
-            SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-            if (textTexture != NULL)
-            {
-                SDL_Rect textRect = {20, 120 + i * 40, textSurface->w, textSurface->h};
-                SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
-                SDL_DestroyTexture(textTexture);
+            // Text
+            SDL_Surface* textSurface = TTF_RenderText_Solid(font, menuItems[i], textColor);
+            if (textSurface) {
+                SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, textSurface);
+                SDL_Rect textRect = {
+                    itemRect.x + 10,
+                    itemRect.y + (itemRect.h - textSurface->h) / 2,
+                    textSurface->w,
+                    textSurface->h
+                };
+                SDL_RenderCopy(renderer, texture, NULL, &textRect);
+                SDL_DestroyTexture(texture);
+                SDL_FreeSurface(textSurface);
             }
-            SDL_FreeSurface(textSurface);
-        }
-        else
-        {
-            fprintf(stderr, "TTF_RenderText_Solid Error: %s\n", TTF_GetError());
         }
     }
 }
@@ -709,6 +787,8 @@ int main(int argc, char *argv[])
     printf("MicroOS starting...\n");
     printf("Press any key to exit the application\n");
 
+    init_menu_animations();
+
     while (running)
     {
         while (SDL_PollEvent(&e))
@@ -728,6 +808,21 @@ int main(int argc, char *argv[])
                     if (x >= 5 && x <= 55 && y >= 285 && y <= 315)
                     {
                         showMenu = !showMenu;
+                        if (showMenu) {
+                            // Start menu animation
+                            menu_anim.current_height = 0;
+                            menu_anim.start_height = 0;
+                            menu_anim.target_height = 180;
+                            menu_anim.animation_start = SDL_GetTicks();
+                            menu_anim.is_animating = true;
+                            
+                            // Reset and start item animations
+                            for (int i = 0; i < MENU_ITEM_COUNT; i++) {
+                                menu_items[i].x = -100;
+                                menu_items[i].velocity = 0;
+                                menu_items[i].is_visible = true;
+                            }
+                        }
                     }
 
                     // Check if any app icon was clicked

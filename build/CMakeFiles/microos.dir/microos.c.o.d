@@ -221,4 +221,5 @@ CMakeFiles/microos.dir/microos.c.o: \
   /Users/maximus.farvour/Documents/MicroOS_Assembly/terminal.h \
   /Users/maximus.farvour/Documents/MicroOS_Assembly/fileui.h \
   /Users/maximus.farvour/Documents/MicroOS_Assembly/editor.h \
-  /Users/maximus.farvour/Documents/MicroOS_Assembly/settings.h
+  /Users/maximus.farvour/Documents/MicroOS_Assembly/settings.h \
+  /Users/maximus.farvour/Documents/MicroOS_Assembly/microos.h
