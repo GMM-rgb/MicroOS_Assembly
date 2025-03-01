@@ -610,6 +610,9 @@ int main(int argc, char *argv[])
             else if (e.type == SDL_KEYDOWN && currentState == OS_STATE_APP1) {
                 terminal_handle_keypress(apps[0].terminal, &e.key);
             }
+            else if (e.type == SDL_MOUSEWHEEL && currentState == OS_STATE_APP1) {
+                terminal_handle_mouse(apps[0].terminal, &e.wheel);
+            }
             if (currentState == OS_STATE_APP2) {
                 if (fileui_handle_event(apps[2].fileui, &e, apps[2].editor)) {
                     // Event was handled by file UI

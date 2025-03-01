@@ -32,4 +32,7 @@ void terminal_execute_command(Terminal* term);
 void terminal_add_line(Terminal* term, const char* line);
 void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL_Rect content_area);
 
+// Add new function declaration
+void terminal_handle_mouse(Terminal* term, SDL_MouseWheelEvent* event);
+
 #endif // MICROOS_TERMINAL_H

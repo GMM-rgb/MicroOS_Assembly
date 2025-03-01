@@ -124,8 +124,8 @@ void terminal_execute_command(Terminal* term) {
 
 void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL_Rect content_area) {
     // Calculate visible lines and max chars based on content area
-    term->visible_lines = content_area.h / CHAR_HEIGHT;
-    term->max_chars_per_line = content_area.w / CHAR_WIDTH - 2; // -2 for margin
+    term->visible_lines = (content_area.h - CHAR_HEIGHT) / CHAR_HEIGHT; // Reserve space for command line
+    term->max_chars_per_line = (content_area.w - 10) / CHAR_WIDTH; // Account for margins
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderFillRect(renderer, &content_area);
@@ -137,7 +137,7 @@ void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL
     int end_line = start_line + term->visible_lines;
     if (end_line > term->line_count) end_line = term->line_count;
 
-    // Render terminal lines
+    // Render terminal lines with fixed spacing
     for (int i = start_line; i < end_line; i++) {
         SDL_Surface* surface = TTF_RenderText_Solid(font, term->lines[i], text_color);
         if (surface) {
@@ -154,7 +154,16 @@ void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL
         }
     }
 
-    // Render current command line
+    // Draw separator line above command line
+    SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
+    SDL_RenderDrawLine(renderer, 
+        content_area.x, 
+        content_area.y + content_area.h - CHAR_HEIGHT - 2,
+        content_area.x + content_area.w,
+        content_area.y + content_area.h - CHAR_HEIGHT - 2
+    );
+
+    // Render command line in fixed position at bottom
     char prompt[MAX_COMMAND_LENGTH + 3];
     snprintf(prompt, sizeof(prompt), "> %s", term->current_command);
     SDL_Surface* surface = TTF_RenderText_Solid(font, prompt, text_color);
@@ -162,7 +171,7 @@ void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL
         SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_Rect position = {
             content_area.x + 5,
-            content_area.y + (term->visible_lines - 1) * CHAR_HEIGHT,
+            content_area.y + content_area.h - CHAR_HEIGHT,
             surface->w,
             surface->h
         };
@@ -171,10 +180,10 @@ void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL
         SDL_FreeSurface(surface);
     }
 
-    // Draw scrollbar if needed
+    // Draw scrollbar
     if (term->line_count > term->visible_lines) {
-        int scrollbar_height = content_area.h * term->visible_lines / term->line_count;
-        int scrollbar_position = content_area.h * term->scroll_position / term->line_count;
+        int scrollbar_height = (content_area.h - CHAR_HEIGHT) * term->visible_lines / term->line_count;
+        int scrollbar_position = (content_area.h - CHAR_HEIGHT) * term->scroll_position / term->line_count;
         
         SDL_Rect scrollbar = {
             content_area.x + content_area.w - 8,
@@ -230,6 +239,23 @@ void terminal_handle_keypress(Terminal* term, SDL_KeyboardEvent* event) {
             term->current_command[term->cursor_position] = event->keysym.sym;
             term->cursor_position++;
             term->current_command[term->cursor_position] = '\0';
+        }
+    }
+}
+
+// Add new mouse wheel handling function
+void terminal_handle_mouse(Terminal* term, SDL_MouseWheelEvent* event) {
+    // Scroll up
+    if (event->y > 0) {
+        if (term->scroll_position > 0) {
+            term->scroll_position--;
+        }
+    }
+    // Scroll down
+    else if (event->y < 0) {
+        int max_scroll = term->line_count - term->visible_lines;
+        if (term->scroll_position < max_scroll) {
+            term->scroll_position++;
         }
     }
 }
