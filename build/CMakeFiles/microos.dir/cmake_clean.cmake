@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/microos.dir/bios.c.o"
+  "CMakeFiles/microos.dir/bios.c.o.d"
   "CMakeFiles/microos.dir/display_functions.s.o"
   "CMakeFiles/microos.dir/editor.c.o"
   "CMakeFiles/microos.dir/editor.c.o.d"

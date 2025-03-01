@@ -216,4 +216,23 @@ bool fs_change_dir(FileSystem* fs, const char* path) {
     return false;
 }
 
+// New function: detect and update external media. This is a simple simulation.
+bool fs_detect_external_media(FileSystem* fs) {
+    static bool already_detected = false;
+    // For simulation, we simply check for a file "external.txt" in the current directory.
+    // In real hardware this would probe USB ports etc.
+    if (!already_detected) {
+        // Assume fs_read_file returns non-NULL if external media is available.
+        char* externalCheck = fs_read_file(fs, "/external_flag.txt");
+        if (externalCheck != NULL) {
+            // Add external drive node if not already part of the tree.
+            // For simplicity add a "USB_Drive" node under root.
+            fs_create_file(fs, "/USB_Drive", true);
+            already_detected = true;
+            return true;
+        }
+    }
+    return false;
+}
+
 // ... Add other filesystem function implementations ...

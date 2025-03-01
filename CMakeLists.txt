@@ -40,6 +40,7 @@ set(SOURCES
     editor.c
     settings.c
     settings_menu.c  # Add this line
+    bios.c           # Add this line
     ${ASM_SOURCES}
 )
 

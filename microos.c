@@ -11,6 +11,7 @@
 #include "settings.h"
 #include "microos.h"
 #include "settings_menu.h"  // Add new settings menu header
+#include "bios.h"       // New header for bios_restart
 
 // OS State
 typedef enum
@@ -65,6 +66,12 @@ bool showSettingsSidebar = false;
 
 // Add new global variable for settings UI state
 SettingsUIState settings_ui_state = {0};
+
+// New global flag (set according to command–line, default false)
+bool running_on_raw_hardware = false;
+
+// Prototype for new external media detection function.
+bool fs_detect_external_media(FileSystem* fs);
 
 // Function to calculate the total height of the settings content
 int calculate_settings_content_height(void) {
@@ -795,6 +802,11 @@ void draw_settings_app(SDL_Renderer* renderer, TTF_Font* font, Application* app)
 
 int main(int argc, char *argv[])
 {
+    // Check command line arguments; if "raw" is passed then assume real hardware.
+    if (argc > 1 && strcmp(argv[1], "raw") == 0) {
+        running_on_raw_hardware = true;
+    }
+
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
@@ -994,10 +1006,16 @@ int main(int argc, char *argv[])
                                 }
                                 else if (i == 3)
                                 {
-                                    // Shutdown
-                                    reset_temporary_data(apps);
-                                    currentState = OS_STATE_BOOT;
-                                    bootProgress = 0;
+                                    // If running on real hardware, reboot via BIOS
+                                    if (running_on_raw_hardware) {
+                                        bios_restart();
+                                        // Should not return.
+                                    } else {
+                                        // In simulation, clear unsaved data and reboot.
+                                        reset_temporary_data(apps);
+                                        currentState = OS_STATE_BOOT;
+                                        bootProgress = 0;
+                                    }
                                 }
                                 showMenu = false;
                             }
@@ -1140,6 +1158,12 @@ int main(int argc, char *argv[])
 
             lastTime = currentTime;
             frameCount++;
+        }
+
+        // Update external media detection once per frame
+        if (fs_detect_external_media(fs)) {
+            snprintf(notification, sizeof(notification), "External media connected!");
+            notificationTime = time(NULL);
         }
 
         // Rendering

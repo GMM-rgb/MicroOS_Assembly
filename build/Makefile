@@ -194,6 +194,30 @@ microos/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/build
 .PHONY : microos/fast
 
+bios.o: bios.c.o
+.PHONY : bios.o
+
+# target to build an object file
+bios.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/bios.c.o
+.PHONY : bios.c.o
+
+bios.i: bios.c.i
+.PHONY : bios.i
+
+# target to preprocess a source file
+bios.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/bios.c.i
+.PHONY : bios.c.i
+
+bios.s: bios.c.s
+.PHONY : bios.s
+
+# target to generate assembly for a file
+bios.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/microos.dir/build.make CMakeFiles/microos.dir/bios.c.s
+.PHONY : bios.c.s
+
 display_functions.o: display_functions.s.o
 .PHONY : display_functions.o
 
@@ -385,6 +409,9 @@ help:
 	@echo "... package_source"
 	@echo "... rebuild_cache"
 	@echo "... microos"
+	@echo "... bios.o"
+	@echo "... bios.i"
+	@echo "... bios.s"
 	@echo "... display_functions.o"
 	@echo "... editor.o"
 	@echo "... editor.i"
