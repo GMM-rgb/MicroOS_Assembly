@@ -124,7 +124,8 @@ void terminal_execute_command(Terminal* term) {
 
 void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL_Rect content_area) {
     // Calculate visible lines and max chars based on content area
-    term->visible_lines = (content_area.h - CHAR_HEIGHT) / CHAR_HEIGHT; // Reserve space for command line
+    // Reserve 2 lines: one for cwd and one for the prompt
+    term->visible_lines = (content_area.h - 2 * CHAR_HEIGHT) / CHAR_HEIGHT; 
     term->max_chars_per_line = (content_area.w - 10) / CHAR_WIDTH; // Account for margins
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -132,12 +133,12 @@ void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL
 
     SDL_Color text_color = {0, 255, 0, 255};
     
-    // Calculate the range of lines to display
+    // Calculate the range of lines to display for history (excluding cwd and prompt)
     int start_line = term->scroll_position;
     int end_line = start_line + term->visible_lines;
     if (end_line > term->line_count) end_line = term->line_count;
 
-    // Render terminal lines with fixed spacing
+    // Render terminal history lines
     for (int i = start_line; i < end_line; i++) {
         SDL_Surface* surface = TTF_RenderText_Solid(font, term->lines[i], text_color);
         if (surface) {
@@ -154,15 +155,34 @@ void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL
         }
     }
 
-    // Draw separator line above command line
-    SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
-    SDL_RenderDrawLine(renderer, 
-        content_area.x, 
-        content_area.y + content_area.h - CHAR_HEIGHT - 2,
-        content_area.x + content_area.w,
-        content_area.y + content_area.h - CHAR_HEIGHT - 2
-    );
-
+    // Render current working directory above prompt
+    char cwd_buffer[MAX_PATH];
+    strcpy(cwd_buffer, fs_get_current_path(term->fs));
+    char cwd_display[MAX_PATH];
+    int max_chars = term->max_chars_per_line - 5; // allow space for "cwd: "
+    if ((int)strlen(cwd_buffer) > max_chars) {
+        strncpy(cwd_display, cwd_buffer, max_chars-3);
+        cwd_display[max_chars-3] = '\0';
+        strcat(cwd_display, "...");
+    } else {
+        strcpy(cwd_display, cwd_buffer);
+    }
+    char cwd_text[MAX_PATH];
+    snprintf(cwd_text, sizeof(cwd_text), "cwd: %s", cwd_display);
+    SDL_Surface* cwdSurface = TTF_RenderText_Solid(font, cwd_text, text_color);
+    if (cwdSurface) {
+        SDL_Texture* cwdTexture = SDL_CreateTextureFromSurface(renderer, cwdSurface);
+        SDL_Rect cwdRect = {
+            content_area.x + 5,
+            content_area.y + content_area.h - 2 * CHAR_HEIGHT,
+            cwdSurface->w,
+            cwdSurface->h
+        };
+        SDL_RenderCopy(renderer, cwdTexture, NULL, &cwdRect);
+        SDL_DestroyTexture(cwdTexture);
+        SDL_FreeSurface(cwdSurface);
+    }
+    
     // Render command line in fixed position at bottom
     char prompt[MAX_COMMAND_LENGTH + 3];
     snprintf(prompt, sizeof(prompt), "> %s", term->current_command);
@@ -180,10 +200,10 @@ void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL
         SDL_FreeSurface(surface);
     }
 
-    // Draw scrollbar
+    // Draw scrollbar if needed
     if (term->line_count > term->visible_lines) {
-        int scrollbar_height = (content_area.h - CHAR_HEIGHT) * term->visible_lines / term->line_count;
-        int scrollbar_position = (content_area.h - CHAR_HEIGHT) * term->scroll_position / term->line_count;
+        int scrollbar_height = (content_area.h - 2 * CHAR_HEIGHT) * term->visible_lines / term->line_count;
+        int scrollbar_position = (content_area.h - 2 * CHAR_HEIGHT) * term->scroll_position / term->line_count;
         
         SDL_Rect scrollbar = {
             content_area.x + content_area.w - 8,
