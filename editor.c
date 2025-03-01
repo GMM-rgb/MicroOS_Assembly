@@ -238,3 +238,26 @@ bool editor_save(TextEditor* editor, FileSystem* fs) {
     free(content);
     return result;
 }
+
+void editor_insert_text(TextEditor* editor, const char* text) {
+    if (!editor->is_open) return;
+
+    // Save undo state
+    editor_save_undo_state(editor);
+
+    // Insert text at the current cursor position
+    DocumentLine* line = &editor->lines[editor->cursor_line];
+    int text_len = strlen(text);
+    int new_length = line->length + text_len;
+
+    if (new_length >= MAX_LINE_LENGTH) {
+        text_len = MAX_LINE_LENGTH - line->length - 1;
+    }
+
+    memmove(line->text + editor->cursor_col + text_len, line->text + editor->cursor_col, line->length - editor->cursor_col + 1);
+    memcpy(line->text + editor->cursor_col, text, text_len);
+    line->length += text_len;
+    editor->cursor_col += text_len;
+
+    editor->has_changes = true;
+}

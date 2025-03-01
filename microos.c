@@ -19,8 +19,9 @@ typedef enum
 {
     OS_STATE_BOOT,
     OS_STATE_DESKTOP,
-    OS_STATE_APP1,
-    OS_STATE_APP2,
+    OS_STATE_APP1,   // Terminal
+    OS_STATE_APP2,   // Settings
+    OS_STATE_APP3,   // Document Editor
     OS_STATE_MENU
 } OSState;
 
@@ -193,6 +194,40 @@ void draw_terminal_icon(SDL_Renderer* renderer, SDL_Rect icon_rect) {
     }
 }
 
+// Add document editor icon drawing function
+void draw_document_icon(SDL_Renderer* renderer, SDL_Rect icon_rect) {
+    // Draw document icon background (white rectangle)
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderFillRect(renderer, &icon_rect);
+    
+    // Draw document outline
+    SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
+    SDL_RenderDrawRect(renderer, &icon_rect);
+    
+    // Draw text lines
+    int line_spacing = 6;
+    int start_y = icon_rect.y + 10;
+    int line_width = icon_rect.w * 0.7;
+    
+    for (int i = 0; i < 5; i++) {
+        SDL_Rect line = {
+            icon_rect.x + (icon_rect.w - line_width) / 2,
+            start_y + i * line_spacing,
+            line_width,
+            2
+        };
+        SDL_RenderFillRect(renderer, &line);
+    }
+    
+    // Draw folded corner
+    SDL_Point points[3] = {
+        {icon_rect.x + icon_rect.w - 10, icon_rect.y},
+        {icon_rect.x + icon_rect.w, icon_rect.y},
+        {icon_rect.x + icon_rect.w, icon_rect.y + 10}
+    };
+    SDL_RenderDrawLines(renderer, points, 3);
+}
+
 void draw_desktop(SDL_Renderer *renderer, TTF_Font *font, Application *apps, int appCount)
 {
     // Draw desktop background
@@ -210,6 +245,8 @@ void draw_desktop(SDL_Renderer *renderer, TTF_Font *font, Application *apps, int
         // For Terminal app (index 0), draw the special terminal icon
         if (i == 0) {  // Terminal is the first app
             draw_terminal_icon(renderer, apps[i].icon);
+        } else if (i == 2) {  // Document Editor
+            draw_document_icon(renderer, apps[i].icon);
         }
 
         // Draw icon text
@@ -409,6 +446,8 @@ void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_C
         if (apps[2].editor->is_open) {
             editor_render(apps[2].editor, renderer, font);
         }
+    } else if (strcmp(appName, "Document Editor") == 0) {
+        editor_render(apps[2].editor, renderer, font);
     }
 }
 
@@ -642,9 +681,9 @@ int main(int argc, char *argv[])
     apps[1].icon = (SDL_Rect){140, 40, 50, 50};
     apps[1].color = (SDL_Color){100, 100, 200, 255};
 
-    strcpy(apps[2].name, "Files");
+    strcpy(apps[2].name, "Document Editor");
     apps[2].icon = (SDL_Rect){240, 40, 50, 50};
-    apps[2].color = (SDL_Color){50, 150, 50, 255};
+    apps[2].color = (SDL_Color){255, 255, 255, 255};
 
     FileSystem* fs = fs_init();
     apps[2].fs = fs;  // Assign to Files app
@@ -709,6 +748,11 @@ int main(int argc, char *argv[])
                                 currentState = OS_STATE_APP2;
                                 strcpy(currentAppName, "Settings");
                                 currentAppColor = apps[i].color;
+                            } else if (i == 2) {
+                                currentState = OS_STATE_APP3;
+                                strcpy(currentAppName, "Document Editor");
+                                currentAppColor = apps[i].color;
+                                apps[2].editor->is_open = true;
                             }
                             showMenu = false;
                             snprintf(notification, sizeof(notification), "Opening %s...", apps[i].name);
@@ -812,6 +856,15 @@ int main(int argc, char *argv[])
                     }
                 }
             }
+            if (currentState == OS_STATE_APP3) {
+                if (editor_handle_event(apps[2].editor, &e)) {
+                    continue;
+                }
+            }
+            // Handle text input for document editor
+            if (e.type == SDL_TEXTINPUT && currentState == OS_STATE_APP3) {
+                editor_insert_text(apps[2].editor, e.text.text);
+            }
         }
 
         // Update logic
@@ -859,6 +912,7 @@ int main(int argc, char *argv[])
 
         case OS_STATE_APP1:
         case OS_STATE_APP2:
+        case OS_STATE_APP3:
             draw_desktop(renderer, font, apps, 3);
             draw_taskbar(renderer, font);
             draw_app(renderer, font, currentAppName, currentAppColor, display_memory, apps[2].fs, apps);
