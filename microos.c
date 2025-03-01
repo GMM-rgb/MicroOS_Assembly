@@ -59,6 +59,10 @@ float ease_out_elastic(float t);
 MenuAnimation menu_anim = {0, 180, 0, 0, false};
 MenuItemAnimation menu_items[MENU_ITEM_COUNT] = {0};
 
+// New global variables for settings page and sidebar state
+char currentSettingsPage[16] = "";
+bool showSettingsSidebar = false;
+
 void init_menu_animations() {
     for (int i = 0; i < MENU_ITEM_COUNT; i++) {
         menu_items[i].x = -100;  // Start offscreen
@@ -457,34 +461,39 @@ void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_C
     }
     else if (strcmp(appName, "Settings") == 0)
     {
-        const char *options[] = {
-            "Display",
-            "Sound",
-            "Network",
-            "About"};
+        if (showSettingsSidebar) {
+            SDL_Rect winRect = {0, 0, 320, 320};
+            draw_settings_menu(renderer, font, &apps[1].settings, winRect);
+        } else {
+            const char *options[] = {
+                "Display",
+                "Sound",
+                "Network",
+                "About"};
 
-        for (int i = 0; i < 4; i++)
-        {
-            SDL_Rect optionRect = {35, 60 + i * 40, 250, 30};
-            SDL_SetRenderDrawColor(renderer, 230, 230, 230, 255);
-            SDL_RenderFillRect(renderer, &optionRect);
-
-            SDL_Color optionText = {0, 0, 0, 255};
-            SDL_Surface *textSurface = TTF_RenderText_Solid(font, options[i], optionText);
-            if (textSurface != NULL)
+            for (int i = 0; i < 4; i++)
             {
-                SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-                if (textTexture != NULL)
+                SDL_Rect optionRect = {35, 60 + i * 40, 250, 30};
+                SDL_SetRenderDrawColor(renderer, 230, 230, 230, 255);
+                SDL_RenderFillRect(renderer, &optionRect);
+
+                SDL_Color optionText = {0, 0, 0, 255};
+                SDL_Surface *textSurface = TTF_RenderText_Solid(font, options[i], optionText);
+                if (textSurface != NULL)
                 {
-                    SDL_Rect textRect = {45, 65 + i * 40, textSurface->w, textSurface->h};
-                    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
-                    SDL_DestroyTexture(textTexture);
+                    SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+                    if (textTexture != NULL)
+                    {
+                        SDL_Rect textRect = {45, 65 + i * 40, textSurface->w, textSurface->h};
+                        SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+                        SDL_DestroyTexture(textTexture);
+                    }
+                    SDL_FreeSurface(textSurface);
                 }
-                SDL_FreeSurface(textSurface);
-            }
-            else
-            {
-                fprintf(stderr, "TTF_RenderText_Solid Error: %s\n", TTF_GetError());
+                else
+                {
+                    fprintf(stderr, "TTF_RenderText_Solid Error: %s\n", TTF_GetError());
+                }
             }
         }
     }
@@ -797,6 +806,8 @@ int main(int argc, char *argv[])
             {
                 int x = e.button.x;
                 int y = e.button.y;
+                int w, h;
+                SDL_GetWindowSize(window, &w, &h);
 
                 if (currentState == OS_STATE_DESKTOP)
                 {
@@ -835,9 +846,10 @@ int main(int argc, char *argv[])
                             }
                             else if (i == 1)
                             {
-                                // For Settings icon, instead of full app launch show sidebar
-                                showSettingsMenu = true;
-                                // You can also clear other states if needed
+                                currentState = OS_STATE_APP2;
+                                strcpy(currentAppName, "Settings");
+                                currentAppColor = apps[i].color;
+                                showSettingsSidebar = false;
                             } else if (i == 2) {
                                 currentState = OS_STATE_APP3;
                                 strcpy(currentAppName, "Document Editor");
@@ -883,14 +895,10 @@ int main(int argc, char *argv[])
                 else if (currentState == OS_STATE_APP1 || currentState == OS_STATE_APP2 || currentState == OS_STATE_APP3)
                 {
                     // Close button as drawn in draw_app: x from 295 to 320, y from 0 to 25.
-                    if (e.type == SDL_MOUSEBUTTONDOWN) {
-                        int x = e.button.x;
-                        int y = e.button.y;
-                        if (x >= 295 && x <= 320 && y >= 0 && y <= 25) {
-                            currentState = OS_STATE_DESKTOP;
-                            snprintf(notification, sizeof(notification), "Closed %s", currentAppName);
-                            notificationTime = time(NULL);
-                        }
+                    if (x >= 295 && x <= 320 && y >= 0 && y <= 25) {
+                        currentState = OS_STATE_DESKTOP;
+                        snprintf(notification, sizeof(notification), "Closed %s", currentAppName);
+                        notificationTime = time(NULL);
                     }
                 }
             }
@@ -914,36 +922,31 @@ int main(int argc, char *argv[])
                 if (e.type == SDL_MOUSEBUTTONDOWN) {
                     int x = e.button.x;
                     int y = e.button.y;
-                    
-                    // Check for resolution buttons
-                    for (int i = 0; i < 5; i++) {
-                        SDL_Rect button = {35, 90 + i * 35, 100, 25};
-                        if (x >= button.x && x <= button.x + button.w &&
-                            y >= button.y && y <= button.y + button.h) {
-                            apps[0].settings.resolution = i;
-                            settings_apply_resolution(&apps[0].settings, window);
-                            break;
-                        }
-                    }
-
-                    // Check for theme buttons
-                    for (int i = 0; i < 3; i++) {
-                        SDL_Rect button = {35, 230 + i * 35, 100, 25};
-                        if (x >= button.x && x <= button.x + button.w &&
-                            y >= button.y && y <= button.y + button.h) {
-                            apps[0].settings.theme = i;
-                            settings_apply_theme(&apps[0].settings);
-                            break;
-                        }
-                    }
-
-                    // Check for close button in settings sidebar
                     int win_w, win_h;
                     SDL_GetWindowSize(window, &win_w, &win_h);
+                    
+                    // Check for close button in settings sidebar
                     SDL_Rect closeButtonRect = {win_w / 2 - 30, 10, 20, 20};
-                    if (x >= closeButtonRect.x && x <= closeButtonRect.x + closeButtonRect.w &&
-                        y >= closeButtonRect.y && y <= closeButtonRect.y + closeButtonRect.h) {
-                        showSettingsMenu = false;
+                    if (x >= 0 && x <= win_w/2) {
+                        if (x >= closeButtonRect.x && x <= closeButtonRect.x + closeButtonRect.w &&
+                            y >= closeButtonRect.y && y <= closeButtonRect.y + closeButtonRect.h) {
+                            showSettingsSidebar = false;
+                        }
+                    }
+                    
+                    // Check for resolution buttons
+                    int res_y = 75;
+                    for (int i = 0; i < 5; i++) {
+                        SDL_Rect button = {10, res_y, 120, 25};
+                        if (x >= 0 && x <= win_w/2) {
+                            if (x >= button.x && x <= button.x + button.w &&
+                                y >= button.y && y <= button.y + button.h) {
+                                apps[0].settings.resolution = i;
+                                settings_apply_resolution(&apps[0].settings, window);
+                                break;
+                            }
+                        }
+                        res_y += 35;
                     }
                 }
                 // Handle UI scale slider dragging

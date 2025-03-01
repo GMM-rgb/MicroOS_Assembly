@@ -6,6 +6,11 @@
 #include <stdio.h>
 #include <math.h>
 
+// Helper function to check if a point is within a rectangle
+static bool point_in_rect(int x, int y, SDL_Rect rect) {
+    return x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h;
+}
+
 // Draws a left-side settings sidebar showing resolution and UI scale.
 void draw_settings_menu(SDL_Renderer* renderer, TTF_Font* font, SystemSettings* settings, SDL_Rect window) {
     // Define sidebar dimensions (adjust width and height to a fraction of window)
@@ -78,4 +83,18 @@ void draw_settings_menu(SDL_Renderer* renderer, TTF_Font* font, SystemSettings* 
     SDL_RenderFillRect(renderer, &knob);
     
     // End of sidebar. You can add more options as required.
+}
+
+// Function to handle events in the settings menu
+void handle_settings_menu_event(SDL_Event* event, SystemSettings* settings, bool* menuOpen) {
+    if (event->type == SDL_MOUSEBUTTONDOWN) {
+        int x = event->button.x;
+        int y = event->button.y;
+
+        // Check if the close button was clicked
+        SDL_Rect closeButtonRect = {settings->window_width / 2 - 30, 10, 20, 20};
+        if (point_in_rect(x, y, closeButtonRect)) {
+            *menuOpen = false;
+        }
+    }
 }
