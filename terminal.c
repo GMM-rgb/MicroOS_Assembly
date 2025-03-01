@@ -11,6 +11,8 @@ Terminal* terminal_create(FileSystem* fs) {
     term->fs = fs;
     term->history_count = 0;
     term->history_position = -1;
+    term->visible_lines = 0;  // Will be set in render
+    term->max_chars_per_line = 0;  // Will be set in render
     term->current_command[0] = '\0';
     terminal_add_line(term, "MicroOS Terminal v1.0");
     terminal_add_line(term, "Type 'help' for available commands");
@@ -26,8 +28,39 @@ void terminal_destroy(Terminal* term) {
 
 void terminal_add_line(Terminal* term, const char* line) {
     if (term->line_count < MAX_TERMINAL_LINES) {
-        term->lines[term->line_count] = strdup(line);
-        term->line_count++;
+        // Word wrap long lines
+        if (term->max_chars_per_line > 0 && strlen(line) > term->max_chars_per_line) {
+            char buffer[MAX_COMMAND_LENGTH];
+            int pos = 0;
+            while (pos < strlen(line)) {
+                int chars_to_copy = term->max_chars_per_line;
+                if (strlen(line + pos) > chars_to_copy) {
+                    // Look for last space within the limit
+                    int last_space = chars_to_copy;
+                    while (last_space > 0 && line[pos + last_space] != ' ') {
+                        last_space--;
+                    }
+                    if (last_space > 0) {
+                        chars_to_copy = last_space;
+                    }
+                } else {
+                    chars_to_copy = strlen(line + pos);
+                }
+                
+                strncpy(buffer, line + pos, chars_to_copy);
+                buffer[chars_to_copy] = '\0';
+                term->lines[term->line_count++] = strdup(buffer);
+                pos += chars_to_copy;
+                if (line[pos] == ' ') pos++; // Skip space
+            }
+        } else {
+            term->lines[term->line_count++] = strdup(line);
+        }
+        
+        // Auto-scroll to bottom when new line is added
+        if (term->line_count > term->visible_lines) {
+            term->scroll_position = term->line_count - term->visible_lines;
+        }
     }
 }
 
@@ -90,21 +123,28 @@ void terminal_execute_command(Terminal* term) {
 }
 
 void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL_Rect content_area) {
+    // Calculate visible lines and max chars based on content area
+    term->visible_lines = content_area.h / CHAR_HEIGHT;
+    term->max_chars_per_line = content_area.w / CHAR_WIDTH - 2; // -2 for margin
+
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderFillRect(renderer, &content_area);
 
     SDL_Color text_color = {0, 255, 0, 255};
-    int line_height = 20;
-    int visible_lines = content_area.h / line_height;
-    int start_line = term->line_count > visible_lines ? term->line_count - visible_lines : 0;
+    
+    // Calculate the range of lines to display
+    int start_line = term->scroll_position;
+    int end_line = start_line + term->visible_lines;
+    if (end_line > term->line_count) end_line = term->line_count;
 
-    for (int i = start_line; i < term->line_count; i++) {
+    // Render terminal lines
+    for (int i = start_line; i < end_line; i++) {
         SDL_Surface* surface = TTF_RenderText_Solid(font, term->lines[i], text_color);
         if (surface) {
             SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
             SDL_Rect position = {
                 content_area.x + 5,
-                content_area.y + (i - start_line) * line_height,
+                content_area.y + (i - start_line) * CHAR_HEIGHT,
                 surface->w,
                 surface->h
             };
@@ -114,6 +154,7 @@ void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL
         }
     }
 
+    // Render current command line
     char prompt[MAX_COMMAND_LENGTH + 3];
     snprintf(prompt, sizeof(prompt), "> %s", term->current_command);
     SDL_Surface* surface = TTF_RenderText_Solid(font, prompt, text_color);
@@ -121,13 +162,28 @@ void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL
         SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_Rect position = {
             content_area.x + 5,
-            content_area.y + (term->line_count - start_line) * line_height,
+            content_area.y + (term->visible_lines - 1) * CHAR_HEIGHT,
             surface->w,
             surface->h
         };
         SDL_RenderCopy(renderer, texture, NULL, &position);
         SDL_DestroyTexture(texture);
         SDL_FreeSurface(surface);
+    }
+
+    // Draw scrollbar if needed
+    if (term->line_count > term->visible_lines) {
+        int scrollbar_height = content_area.h * term->visible_lines / term->line_count;
+        int scrollbar_position = content_area.h * term->scroll_position / term->line_count;
+        
+        SDL_Rect scrollbar = {
+            content_area.x + content_area.w - 8,
+            content_area.y + scrollbar_position,
+            6,
+            scrollbar_height
+        };
+        SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
+        SDL_RenderFillRect(renderer, &scrollbar);
     }
 }
 
@@ -158,6 +214,17 @@ void terminal_handle_keypress(Terminal* term, SDL_KeyboardEvent* event) {
         if (term->cursor_position > 0) term->cursor_position--;
     } else if (event->keysym.sym == SDLK_RIGHT) {
         if (term->cursor_position < strlen(term->current_command)) term->cursor_position++;
+    } else if (event->keysym.sym == SDLK_PAGEUP) {
+        if (term->scroll_position > 0) {
+            term->scroll_position -= term->visible_lines;
+            if (term->scroll_position < 0) term->scroll_position = 0;
+        }
+    } else if (event->keysym.sym == SDLK_PAGEDOWN) {
+        int max_scroll = term->line_count - term->visible_lines;
+        if (term->scroll_position < max_scroll) {
+            term->scroll_position += term->visible_lines;
+            if (term->scroll_position > max_scroll) term->scroll_position = max_scroll;
+        }
     } else {
         if (term->cursor_position < MAX_COMMAND_LENGTH - 1) {
             term->current_command[term->cursor_position] = event->keysym.sym;

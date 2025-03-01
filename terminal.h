@@ -8,13 +8,17 @@
 #define MAX_COMMAND_HISTORY 100
 #define MAX_COMMAND_LENGTH 256
 #define MAX_TERMINAL_LINES 1000
+#define CHAR_WIDTH 8  // Approximate width of a character
+#define CHAR_HEIGHT 16 // Height of a character/line
 
 typedef struct {
     char* lines[MAX_TERMINAL_LINES];
     int line_count;
     char current_command[MAX_COMMAND_LENGTH];
     int cursor_position;
-    int scroll_position;
+    int scroll_position;  // Number of lines scrolled
+    int visible_lines;    // Number of lines that can be displayed
+    int max_chars_per_line; // Maximum characters per line
     FileSystem* fs;
     char command_history[MAX_COMMAND_HISTORY][MAX_COMMAND_LENGTH];
     int history_count;
