@@ -1,0 +1,119 @@
+sudo XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR ./microos
+
+
+
+
+
+MicroOS starting...
+Press any key to exit the application
+==298080== 
+==298080== Process terminating with default action of signal 11 (SIGSEGV)
+==298080==  General Protection Fault
+==298080==    at 0x4A9E806: getenv (getenv.c:31)
+==298080==    by 0x53CBB53: ??? (in /usr/lib/x86_64-linux-gnu/libharfbuzz.so.0.60830.0)
+==298080==    by 0x53C8A35: ??? (in /usr/lib/x86_64-linux-gnu/libharfbuzz.so.0.60830.0)
+==298080==    by 0x53D2727: hb_shape_plan_create_cached2 (in /usr/lib/x86_64-linux-gnu/libharfbuzz.so.0.60830.0)
+==298080==    by 0x53D2A24: hb_shape_full (in /usr/lib/x86_64-linux-gnu/libharfbuzz.so.0.60830.0)
+==298080==    by 0x4A4E5B6: ??? (in /usr/lib/x86_64-linux-gnu/libSDL2_ttf-2.0.so.0.2200.0)
+==298080==    by 0x4A4EDA3: ??? (in /usr/lib/x86_64-linux-gnu/libSDL2_ttf-2.0.so.0.2200.0)
+==298080==    by 0x401DF0: draw_boot_sequence (in /mnt/d/MicroOS/build/microos)
+==298080==    by 0x40366B: main (in /mnt/d/MicroOS/build/microos)
+==298080==
+==298080== HEAP SUMMARY:
+==298080==     in use at exit: 19,246,973 bytes in 83,315 blocks
+==298080==   total heap usage: 169,744 allocs, 86,429 frees, 46,507,216 bytes allocated
+==298080==
+==298080== LEAK SUMMARY:
+==298080==    definitely lost: 512 bytes in 1 blocks
+==298080==    indirectly lost: 0 bytes in 0 blocks
+==298080==      possibly lost: 12,344,327 bytes in 54,539 blocks
+==298080==    still reachable: 6,902,134 bytes in 28,775 blocks
+==298080==                       of which reachable via heuristic:
+==298080==                         newarray           : 20,376 bytes in 33 blocks
+==298080==         suppressed: 0 bytes in 0 blocks
+==298080== Rerun with --leak-check=full to see details of leaked memory
+==298080==
+==298080== Use --track-origins=yes to see where uninitialised values come from
+==298080== For lists of detected and suppressed errors, rerun with: -s
+==298080== ERROR SUMMARY: 344210 errors from 1000 contexts (suppressed: 0 from 0)
+Segmentation fault (core dumped)
+maximus@MAXIMUS-DESKTOP:/mnt/d/MicroOS/build$
+
+
+
+
+
+Working assembly file:
+
+; display_functions.asm - x86-64 implementation
+; Compile with NASM for x86-64 systems
+
+section .data
+    tick dq 0               ; Define tick as a 64-bit integer (quadword) initialized to 0
+
+section .text
+    global initialize_display_memory
+    global update_display
+
+; void initialize_display_memory(unsigned char *display_memory)
+initialize_display_memory:
+    push rbp
+    mov rbp, rsp
+    push rbx                  ; Save rbx
+    push rdi                  ; Save rdi
+    
+    mov rdi, [rbp+16]         ; Get display_memory pointer (64-bit ABI)
+    xor rbx, rbx              ; Clear counter
+    
+.init_loop:
+    mov [rdi+rbx], al         ; Store value to memory at rbx index
+    inc rbx
+    cmp rbx, 64               ; Only loop 64 times
+    jl .init_loop
+    
+    pop rdi
+    pop rbx
+    pop rbp
+    ret
+
+; void update_display(unsigned char *display_memory)
+update_display:
+    push rbp
+    mov rbp, rsp
+    push rbx                  ; Save rbx
+    ; Use RDI directly—do not reload from the stack.
+    ; The display_memory pointer is already in RDI.
+
+    ; Increment our animation counter (static variable)
+    mov rax, [tick]           ; Load the current value of tick
+    inc rax                   ; Increment tick
+    mov [tick], rax           ; Store the new value of tick
+
+    xor rbx, rbx              ; Clear counter
+    
+.update_loop:
+    mov al, [rdi+rbx]         ; Get current byte
+    inc al                    ; Increment byte
+    mov [rdi+rbx], al         ; Store incremented byte
+
+    mov rax, rbx              ; Current index
+    add rax, [tick]           ; Add tick value
+    xor rdx, rdx
+    mov rcx, 5                ; Set divisor to 5
+    div rcx                   ; Divide by 5
+    cmp rdx, 0
+    jne .skip_variation       ; If remainder is not zero, skip modification
+    
+    mov al, [rdi+rbx]         ; Load current byte again
+    add al, 10                ; Add 10 to current byte
+    mov [rdi+rbx], al         ; Store updated byte
+    
+.skip_variation:
+    inc rbx                   ; Increment index
+    cmp rbx, 64               ; Check if we've looped through all 64 elements
+    jl .update_loop           ; If not, repeat the loop
+
+    pop rbx
+    pop rbp
+    ret
+

@@ -1,0 +1,9 @@
+/mnt/d/MicroOS/build/CMakeFiles/microos.dir
+/mnt/d/MicroOS/build/CMakeFiles/package.dir
+/mnt/d/MicroOS/build/CMakeFiles/package_source.dir
+/mnt/d/MicroOS/build/CMakeFiles/edit_cache.dir
+/mnt/d/MicroOS/build/CMakeFiles/rebuild_cache.dir
+/mnt/d/MicroOS/build/CMakeFiles/list_install_components.dir
+/mnt/d/MicroOS/build/CMakeFiles/install.dir
+/mnt/d/MicroOS/build/CMakeFiles/install/local.dir
+/mnt/d/MicroOS/build/CMakeFiles/install/strip.dir

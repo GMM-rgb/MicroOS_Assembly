@@ -1,0 +1,1 @@
+/usr/bin/cc  -no-pie CMakeFiles/microos.dir/microos.c.o display_functions.asm.o -o microos  /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2_ttf.so 
