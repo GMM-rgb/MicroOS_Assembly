@@ -5,8 +5,12 @@ project(MicroOS C ASM)
 if(WIN32)
     set(SDL2_DIR "${CMAKE_SOURCE_DIR}/external/SDL2" CACHE PATH "SDL2 directory")
     set(SDL2_TTF_DIR "${CMAKE_SOURCE_DIR}/external/SDL2_ttf" CACHE PATH "SDL2_ttf directory")
+elseif(APPLE) # macOS-specific setup
+    set(CMAKE_OSX_ARCHITECTURES "arm64") # Use "x86_64" for Intel-based Macs, "arm64" for Apple Silicon
+    set(SDL2_DIR "/usr/local" CACHE PATH "SDL2 directory") # Adjust if SDL2 is installed elsewhere
+    set(SDL2_TTF_DIR "/usr/local" CACHE PATH "SDL2_ttf directory")
 elseif(UNIX)
-    set(SDL2_DIR "/usr" CACHE PATH "SDL2 directory")  # Adjust this path as needed for Linux
+    set(SDL2_DIR "/usr" CACHE PATH "SDL2 directory")  # Adjust for Linux
     set(SDL2_TTF_DIR "/usr" CACHE PATH "SDL2_ttf directory")  # Adjust for Linux
 endif()
 
@@ -16,7 +20,7 @@ find_package(SDL2_ttf REQUIRED)
 
 # Determine whether to use assembly or C implementation
 set(USE_ASM FALSE)
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "i386|i686|x86|x86_64|amd64")
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "i386|i686|x86|x86_64|amd64|arm64")
     set(USE_ASM TRUE)
 endif()
 
@@ -40,9 +44,9 @@ if(USE_ASM)
     # Explicitly compile the ASM file with nasm
     add_custom_command(
         OUTPUT ${CMAKE_BINARY_DIR}/display_functions.asm.o
-        COMMAND nasm -f elf64 -o ${CMAKE_BINARY_DIR}/display_functions.asm.o ${CMAKE_SOURCE_DIR}/display_functions.asm
+        COMMAND nasm -f macho64 -o ${CMAKE_BINARY_DIR}/display_functions.asm.o ${CMAKE_SOURCE_DIR}/display_functions.asm
         DEPENDS ${CMAKE_SOURCE_DIR}/display_functions.asm
-        COMMENT "Compiling display_functions.asm with NASM"
+        COMMENT "Compiling display_functions.asm with NASM for macOS"
     )
     
     # Add the generated object file to the sources list
@@ -52,7 +56,11 @@ else()
 endif()
 
 # Disable PIE linking to avoid relocation issues in the assembly object
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -no-pie")
+if(APPLE)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-no_pie")
+else()
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -no-pie")
+endif()
 
 # Create executable
 add_executable(microos ${SOURCES})
@@ -75,6 +83,10 @@ if(WIN32)
     file(GLOB SDL2_DLLS "${SDL2_DIR}/lib/x64/*.dll")
     file(GLOB SDL2_TTF_DLLS "${SDL2_TTF_DIR}/lib/x64/*.dll")
     file(COPY ${SDL2_DLLS} ${SDL2_TTF_DLLS} DESTINATION ${CMAKE_BINARY_DIR})
+elseif(APPLE)
+    find_library(SDL2_LIB SDL2)
+    find_library(SDL2_TTF_LIB SDL2_ttf)
+    target_link_libraries(microos ${SDL2_LIB} ${SDL2_TTF_LIB})
 elseif(UNIX)
     find_library(SDL2_LIB SDL2)
     find_library(SDL2_TTF_LIB SDL2_ttf)
