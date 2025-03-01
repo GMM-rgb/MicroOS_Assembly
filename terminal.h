@@ -8,8 +8,8 @@
 #define MAX_COMMAND_HISTORY 100
 #define MAX_COMMAND_LENGTH 256
 #define MAX_TERMINAL_LINES 1000
-#define CHAR_WIDTH 8  // Approximate width of a character
-#define CHAR_HEIGHT 16 // Height of a character/line
+#define CHAR_WIDTH 10  // Increase from 8 to 10
+#define CHAR_HEIGHT 20 // Increase from 16 to 20
 
 typedef struct {
     char* lines[MAX_TERMINAL_LINES];

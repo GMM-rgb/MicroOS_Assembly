@@ -571,23 +571,26 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    SDL_Window *window = SDL_CreateWindow("MicroOS", 100, 100, 320, 320, SDL_WINDOW_SHOWN);
-    if (window == NULL)
-    {
-        fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
-    }
+    // Update window creation to enable high DPI support
+    SDL_Window *window = SDL_CreateWindow("MicroOS", 
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+        320, 320, 
+        SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (renderer == NULL)
-    {
-        SDL_DestroyWindow(window);
-        fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
+    // Update renderer creation with better quality flags
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1,
+        SDL_RENDERER_ACCELERATED | 
+        SDL_RENDERER_PRESENTVSYNC | 
+        SDL_RENDERER_TARGETTEXTURE);
+    
+    if (renderer) {
+        // Enable anti-aliasing and better scaling quality
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");  // Use best quality scaling
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+        SDL_SetHint(SDL_HINT_RENDER_LINE_METHOD, "3");  // Use anti-aliased lines
+        
+        // Set logical size to maintain aspect ratio
+        SDL_RenderSetLogicalSize(renderer, 320, 320);
     }
 
     TTF_Font *font = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 14);
