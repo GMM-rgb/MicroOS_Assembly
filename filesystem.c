@@ -53,7 +53,7 @@ FileSystem* fs_init(void) {
     
     // Create some sample files
     fs_create_file(fs, "/home/welcome.txt", false);
-    fs_write_file(fs, "/home/welcome.txt", "Welcome to MicroOS!\nType 'help' for commands.\n");
+    fs_write_file(fs, "/home/welcome.txt", "Welcome to MicroOS!\nType 'help' for commands.\nFeel free to explore.");
     
     return fs;
 }
