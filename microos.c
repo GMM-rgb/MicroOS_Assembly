@@ -789,14 +789,17 @@ int main(int argc, char *argv[])
                         }
                     }
                 }
-                else if (currentState == OS_STATE_APP1 || currentState == OS_STATE_APP2)
+                else if (currentState == OS_STATE_APP1 || currentState == OS_STATE_APP2 || currentState == OS_STATE_APP3)
                 {
-                    // Check if close button was clicked
-                    if (x >= 275 && x <= 300 && y >= 20 && y <= 45)
-                    {
-                        currentState = OS_STATE_DESKTOP;
-                        snprintf(notification, sizeof(notification), "Closed %s", currentAppName);
-                        notificationTime = time(NULL);
+                    // Close button as drawn in draw_app: x from 295 to 320, y from 0 to 25.
+                    if (e.type == SDL_MOUSEBUTTONDOWN) {
+                        int x = e.button.x;
+                        int y = e.button.y;
+                        if (x >= 295 && x <= 320 && y >= 0 && y <= 25) {
+                            currentState = OS_STATE_DESKTOP;
+                            snprintf(notification, sizeof(notification), "Closed %s", currentAppName);
+                            notificationTime = time(NULL);
+                        }
                     }
                 }
             }
@@ -857,6 +860,9 @@ int main(int argc, char *argv[])
             }
             if (currentState == OS_STATE_APP3) {
                 if (editor_handle_event(apps[2].editor, &e, apps[2].fs)) {
+                    if (!apps[2].editor->is_open) {
+                        currentState = OS_STATE_DESKTOP;
+                    }
                     continue;
                 }
             }
