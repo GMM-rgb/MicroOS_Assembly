@@ -55,7 +55,7 @@ typedef struct {
 
 TextEditor* editor_create(void);
 void editor_destroy(TextEditor* editor);
-bool editor_handle_event(TextEditor* editor, SDL_Event* event);
+bool editor_handle_event(TextEditor* editor, SDL_Event* event, FileSystem* fs);
 void editor_render(TextEditor* editor, SDL_Renderer* renderer, TTF_Font* font);
 bool editor_save(TextEditor* editor, FileSystem* fs);
 bool editor_load(TextEditor* editor, FileSystem* fs, const char* path);

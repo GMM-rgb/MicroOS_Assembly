@@ -21,7 +21,7 @@ TextEditor* editor_create(void) {
     editor->scroll_x = 0;
     editor->scroll_y = 0;
     editor->selection_start_line = -1;
-    editor->window_rect = (SDL_Rect){20, 20, 600, 400};
+    editor->window_rect = (SDL_Rect){0, 0, 320, 320}; // Full screen
     editor->text_color = (SDL_Color){0, 0, 0, 255};
     editor->current_style = FONT_NORMAL;
     editor->font_size = 14.0f;
@@ -203,18 +203,40 @@ void editor_render(TextEditor* editor, SDL_Renderer* renderer, TTF_Font* font) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderDrawLine(renderer, cursor_x, cursor_y, cursor_x, cursor_y + editor->font_size);
     }
+
+    // Draw close button
+    SDL_Rect closeBtn = {editor->window_rect.x + editor->window_rect.w - 25, editor->window_rect.y, 25, 25};
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &closeBtn);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawLine(renderer, closeBtn.x + 5, closeBtn.y + 5, closeBtn.x + 20, closeBtn.y + 20);
+    SDL_RenderDrawLine(renderer, closeBtn.x + 20, closeBtn.y + 5, closeBtn.x + 5, closeBtn.y + 20);
 }
 
 // Handle events for the TextEditor window (return true if event handled)
-bool editor_handle_event(TextEditor* editor, SDL_Event* event) {
-    // Minimal stub: if close button (for example, mouse click in header's close region) is pressed, close editor.
-    // (You can add text input handling later.)
+bool editor_handle_event(TextEditor* editor, SDL_Event* event, FileSystem* fs) {
     if (event->type == SDL_MOUSEBUTTONDOWN) {
         int x = event->button.x;
         int y = event->button.y;
         SDL_Rect closeBtn = {editor->window_rect.x + editor->window_rect.w - 25, editor->window_rect.y, 25, 25};
         if(x >= closeBtn.x && x <= closeBtn.x + closeBtn.w &&
            y >= closeBtn.y && y <= closeBtn.y + closeBtn.h) {
+               if (editor->has_changes) {
+                   // Show save confirmation dialog
+                   // For simplicity, we'll just print to console
+                   printf("Do you want to save changes? (y/n)\n");
+                   char response;
+                   scanf(" %c", &response);
+                   if (response == 'y' || response == 'Y') {
+                       // Save file
+                       printf("Enter file path to save: ");
+                       char path[256];
+                       scanf("%s", path);
+                       editor->file_path = strdup(path);
+                       // Pass the FileSystem pointer to editor_save
+                       editor_save(editor, fs);
+                   }
+               }
                editor->is_open = false;
                return true;
            }

@@ -353,15 +353,14 @@ void draw_boot_sequence(SDL_Renderer *renderer, TTF_Font *font, int progress, un
 
 // Update function declaration to include apps parameter
 void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_Color appColor, 
-             unsigned char *display_memory, FileSystem* fs, Application* apps)
-{
+             unsigned char *display_memory, FileSystem* fs, Application* apps) {
     // App window background
-    SDL_Rect windowRect = {20, 20, 280, 240};
+    SDL_Rect windowRect = {0, 0, 320, 320}; // Full screen
     SDL_SetRenderDrawColor(renderer, 240, 240, 240, 255);
     SDL_RenderFillRect(renderer, &windowRect);
 
     // App title bar
-    SDL_Rect titleBarRect = {20, 20, 280, 25};
+    SDL_Rect titleBarRect = {0, 0, 320, 25};
     SDL_SetRenderDrawColor(renderer, appColor.r, appColor.g, appColor.b, appColor.a);
     SDL_RenderFillRect(renderer, &titleBarRect);
 
@@ -373,7 +372,7 @@ void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_C
         SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
         if (textTexture != NULL)
         {
-            SDL_Rect textRect = {25, 22, textSurface->w, textSurface->h};
+            SDL_Rect textRect = {5, 2, textSurface->w, textSurface->h};
             SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
             SDL_DestroyTexture(textTexture);
         }
@@ -385,17 +384,17 @@ void draw_app(SDL_Renderer *renderer, TTF_Font *font, const char *appName, SDL_C
     }
 
     // Close button
-    SDL_Rect closeButtonRect = {275, 20, 25, 25};
+    SDL_Rect closeButtonRect = {295, 0, 25, 25};
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &closeButtonRect);
 
     // X on close button
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderDrawLine(renderer, 280, 25, 295, 40);
-    SDL_RenderDrawLine(renderer, 295, 25, 280, 40);
+    SDL_RenderDrawLine(renderer, 300, 5, 315, 20);
+    SDL_RenderDrawLine(renderer, 315, 5, 300, 20);
 
     // App content area
-    SDL_Rect contentRect = {25, 50, 270, 205};
+    SDL_Rect contentRect = {0, 25, 320, 295};
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderFillRect(renderer, &contentRect);
 
@@ -812,7 +811,7 @@ int main(int argc, char *argv[])
                     // Event was handled by file UI
                     continue;
                 }
-                if (editor_handle_event(apps[2].editor, &e)) {
+                if (editor_handle_event(apps[2].editor, &e, apps[2].fs)) {
                     // Event was handled by text editor
                     continue;
                 }
@@ -857,7 +856,7 @@ int main(int argc, char *argv[])
                 }
             }
             if (currentState == OS_STATE_APP3) {
-                if (editor_handle_event(apps[2].editor, &e)) {
+                if (editor_handle_event(apps[2].editor, &e, apps[2].fs)) {
                     continue;
                 }
             }
