@@ -12,6 +12,7 @@
 #include "microos.h"
 #include "settings_menu.h"  // Add new settings menu header
 #include "bios.h"       // New header for bios_restart
+#include "drivers.h"  // Ensure the drivers header is included near the top
 
 // OS State
 typedef enum
@@ -807,6 +808,9 @@ int main(int argc, char *argv[])
         running_on_raw_hardware = true;
     }
 
+    // Initialize drivers based on mode
+    init_drivers(running_on_raw_hardware);
+    
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());

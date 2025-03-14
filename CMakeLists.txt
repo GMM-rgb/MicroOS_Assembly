@@ -41,43 +41,36 @@ set(SOURCES
     settings.c
     settings_menu.c  # Add this line
     bios.c           # Add this line
+    drivers.c        # Added new drivers module
     ${ASM_SOURCES}
 )
 
 # Determine whether to use assembly or C implementation
 set(USE_ASM FALSE)
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "i386|i686|x86|x86_64|amd64|arm64")
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
     set(USE_ASM TRUE)
 endif()
 
 # Add the appropriate display implementation
 if(USE_ASM)
-    # Use assembly implementation
     if(APPLE)
-        enable_language(ASM)
-        set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -arch arm64")
+        # For macOS ARM64, use GAS source
         set(ASM_SOURCES display_functions.s)
         list(APPEND SOURCES ${ASM_SOURCES})
-    else()
-        if(WIN32)
-            set(ASM_SOURCES display_functions_win.asm)
-        else()
-            set(ASM_SOURCES display_functions.asm)
-        endif()
-
-        # Explicitly compile the ASM file with nasm
+    elseif(WIN32)
+        # For Windows ARM64, use NASM source (if applicable)
+        set(ASM_SOURCES display_functions_win.asm)
         add_custom_command(
-            OUTPUT ${CMAKE_BINARY_DIR}/display_functions.asm.o
-            COMMAND nasm -f macho64 -o ${CMAKE_BINARY_DIR}/display_functions.asm.o ${CMAKE_SOURCE_DIR}/display_functions.asm
-            DEPENDS ${CMAKE_SOURCE_DIR}/display_functions.asm
-            COMMENT "Compiling display_functions.asm with NASM for macOS"
+            OUTPUT ${CMAKE_BINARY_DIR}/display_functions_win.asm.o
+            COMMAND nasm -f win64 -o ${CMAKE_BINARY_DIR}/display_functions_win.asm.o ${CMAKE_SOURCE_DIR}/display_functions_win.asm
+            DEPENDS ${CMAKE_SOURCE_DIR}/display_functions_win.asm
+            COMMENT "Compiling display_functions_win.asm with NASM for Windows ARM64"
         )
-
-        # Add the generated object file to the sources list
-        list(APPEND SOURCES ${CMAKE_BINARY_DIR}/display_functions.asm.o)
+        list(APPEND SOURCES ${CMAKE_BINARY_DIR}/display_functions_win.asm.o)
     endif()
 else()
-    list(APPEND SOURCES display_functions.c)
+    # Use C fallback implementation for non-ARM64 platforms
+    list(APPEND SOURCES display_memory.c)
 endif()
 
 # Create executable
@@ -98,7 +91,7 @@ endif()
 # Link libraries (AFTER add_executable)
 if(APPLE)
     find_library(SDL2_LIB SDL2 HINTS /opt/homebrew/lib)
-    find_library(SDL2_TTF_LIB SDL2_ttf HINTS /opt/homebrew/Cellar/sdl2_ttf/2.24.0/lib)
+    find_library(SDL2_TTF_LIB SDL2_ttf HINTS /opt/homebrew/lib)
     target_link_libraries(microos ${SDL2_LIB} ${SDL2_TTF_LIB})
 elseif(WIN32)
     target_link_libraries(microos SDL2 SDL2_ttf)
@@ -106,11 +99,11 @@ else()
     target_link_libraries(microos ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES})
 endif()
 
-# Link SDL2 libraries
-target_link_libraries(microos
-    "${SDL2_LIB_DIR}/libSDL2-2.0.0.dylib"
-    "${SDL2_LIB_DIR}/libSDL2_ttf-2.0.0.dylib"
-)
+# Remove hardcoded macOS-specific paths
+# target_link_libraries(microos
+#     "${SDL2_LIB_DIR}/libSDL2-2.0.0.dylib"
+#     "${SDL2_LIB_DIR}/libSDL2_ttf-2.0.0.dylib"
+# )
 
 # Installation
 install(TARGETS microos DESTINATION bin)

@@ -155,8 +155,11 @@ void editor_render(TextEditor* editor, SDL_Renderer* renderer, TTF_Font* font) {
 
         // Draw ruler markings
         for (int i = 0; i < editor->window_rect.w / 50; i++) {
-            char num[4];
-            snprintf(num, sizeof(num), "%d", i * 5);
+            char num[16]; // Increase buffer size to avoid truncation
+            int written = snprintf(num, sizeof(num), "%d", i * 5);
+            if (written >= sizeof(num)) {
+                fprintf(stderr, "Line number truncation detected in editor_render\n");
+            }
             SDL_Surface* surface = TTF_RenderText_Solid(font, num, 
                                                       (SDL_Color){128, 128, 128, 255});
             if (surface) {

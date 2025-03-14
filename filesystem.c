@@ -196,14 +196,19 @@ char* fs_get_current_path(FileSystem* fs) {
     static char path[MAX_PATH];
     FileNode* current = fs->current_dir;
     path[0] = '\0';
-    
+
     while (current != NULL) {
         char temp[MAX_PATH];
-        snprintf(temp, sizeof(temp), "/%s%s", current->name, path);
+        // Ensure no truncation by checking snprintf's return value
+        int written = snprintf(temp, sizeof(temp), "/%s%s", current->name, path);
+        if (written >= sizeof(temp)) {
+            fprintf(stderr, "Path truncation detected in fs_get_current_path\n");
+            break;
+        }
         strcpy(path, temp);
         current = current->parent;
     }
-    
+
     return path;
 }
 

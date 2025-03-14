@@ -1,2 +1,2 @@
-CMakeFiles/microos.dir/bios.c.o: \
-  /Users/maximus.farvour/Documents/MicroOS_Assembly/bios.c
+CMakeFiles/microos.dir/bios.c.o: /mnt/d/MicroOS/bios.c \
+ /usr/include/stdc-predef.h

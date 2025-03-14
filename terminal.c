@@ -71,8 +71,11 @@ void terminal_execute_command(Terminal* term) {
         term->history_count = (term->history_count + 1) % MAX_COMMAND_HISTORY;
     }
 
-    char cmd[MAX_COMMAND_LENGTH];
-    snprintf(cmd, sizeof(cmd), "> %s", term->current_command);
+    char cmd[256];
+    int written = snprintf(cmd, sizeof(cmd), "> %s", term->current_command);
+    if (written >= sizeof(cmd)) {
+        fprintf(stderr, "Command text truncation detected in terminal_execute_command\n");
+    }
     terminal_add_line(term, cmd);
 
     char* command = strtok(term->current_command, " ");
@@ -195,8 +198,11 @@ void terminal_render(Terminal* term, SDL_Renderer* renderer, TTF_Font* font, SDL
     } else {
         strcpy(cwd_display, cwd_buffer);
     }
-    char cwd_text[MAX_PATH];
-    snprintf(cwd_text, sizeof(cwd_text), "cwd: %s", cwd_display);
+    char cwd_text[1024];
+    int written = snprintf(cwd_text, sizeof(cwd_text), "cwd: %s", cwd_display);
+    if (written >= sizeof(cwd_text)) {
+        fprintf(stderr, "CWD text truncation detected in terminal_render\n");
+    }
     SDL_Surface* cwdSurface = TTF_RenderText_Solid(font, cwd_text, text_color);
     if (cwdSurface) {
         SDL_Texture* cwdTexture = SDL_CreateTextureFromSurface(renderer, cwdSurface);

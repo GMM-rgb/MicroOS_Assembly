@@ -1,7 +1,10 @@
 file(REMOVE_RECURSE
   "CMakeFiles/microos.dir/bios.c.o"
   "CMakeFiles/microos.dir/bios.c.o.d"
-  "CMakeFiles/microos.dir/display_functions.s.o"
+  "CMakeFiles/microos.dir/display_memory.c.o"
+  "CMakeFiles/microos.dir/display_memory.c.o.d"
+  "CMakeFiles/microos.dir/drivers.c.o"
+  "CMakeFiles/microos.dir/drivers.c.o.d"
   "CMakeFiles/microos.dir/editor.c.o"
   "CMakeFiles/microos.dir/editor.c.o.d"
   "CMakeFiles/microos.dir/filesystem.c.o"
@@ -21,6 +24,6 @@ file(REMOVE_RECURSE
 )
 
 # Per-language clean rules from dependency scanning.
-foreach(lang ASM C)
+foreach(lang C)
   include(CMakeFiles/microos.dir/cmake_clean_${lang}.cmake OPTIONAL)
 endforeach()
