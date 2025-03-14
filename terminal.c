@@ -114,7 +114,7 @@ void terminal_execute_command(Terminal* term) {
         fs_list_directory(term->fs, fs_get_current_path(term->fs), &files, &count);
         for (int i = 0; i < count; i++) {
             char info[256];
-            snprintf(info, sizeof(info), "%s  %s  %s", 
+            snprintf(info, sizeof(info) - 1, "%s  %s  %s",  // Ensure null-termination
                     files[i]->name,
                     fs_format_size(files[i]->size),
                     fs_format_time(files[i]->modified));
@@ -124,7 +124,7 @@ void terminal_execute_command(Terminal* term) {
                 int sub_count;
                 fs_list_directory(term->fs, files[i]->name, &sub_files, &sub_count);
                 for (int j = 0; j < sub_count; j++) {
-                    snprintf(info, sizeof(info), "  %s  %s  %s", 
+                    snprintf(info, sizeof(info) - 1, "  %s  %s  %s",  // Ensure null-termination
                             sub_files[j]->name,
                             fs_format_size(sub_files[j]->size),
                             fs_format_time(sub_files[j]->modified));

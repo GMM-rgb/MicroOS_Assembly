@@ -92,11 +92,11 @@ endif()
 if(APPLE)
     find_library(SDL2_LIB SDL2 HINTS /opt/homebrew/lib)
     find_library(SDL2_TTF_LIB SDL2_ttf HINTS /opt/homebrew/lib)
-    target_link_libraries(microos ${SDL2_LIB} ${SDL2_TTF_LIB})
+    target_link_libraries(microos ${SDL2_LIB} ${SDL2_TTF_LIB} m)  # Add 'm' for math library
 elseif(WIN32)
     target_link_libraries(microos SDL2 SDL2_ttf)
 else()
-    target_link_libraries(microos ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES})
+    target_link_libraries(microos ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES} m SDL2_ttf)  # Add SDL2_ttf explicitly
 endif()
 
 # Remove hardcoded macOS-specific paths
