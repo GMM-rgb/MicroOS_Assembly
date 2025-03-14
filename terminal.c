@@ -1,8 +1,8 @@
-#include "terminal.h"
+#include "terminal.h" // Include the terminal header file
 #include "editor.h"  // Include the editor header file
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <string.h> // Include string.h for string functions
+#include <stdio.h> // Include stdio.h for standard I/O functions
+#include <stdlib.h> // Include stdlib.h for memory allocation functions
 
 Terminal* terminal_create(FileSystem* fs) {
     Terminal* term = malloc(sizeof(Terminal));
